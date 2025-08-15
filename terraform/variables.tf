@@ -48,15 +48,15 @@ variable "node_groups" {
   default = {
     elasticsearch = {
       instance_type = "t3.medium"
-      min_size      = 2
-      max_size      = 5
-      desired_size  = 3
+      min_size      = 1
+      max_size      = 2
+      desired_size  = 1
     }
     kibana = {
-      instance_type = "t3.small"
+      instance_type = "t3.medium"
       min_size      = 1
-      max_size      = 3
-      desired_size  = 2
+      max_size      = 2
+      desired_size  = 1
     }
   }
 }
@@ -71,7 +71,7 @@ variable "elasticsearch_version" {
 variable "elasticsearch_replicas" {
   description = "Number of Elasticsearch replicas"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "elasticsearch_storage_size" {
@@ -102,7 +102,7 @@ variable "kibana_version" {
 variable "kibana_replicas" {
   description = "Number of Kibana replicas"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "kibana_storage_size" {
@@ -172,7 +172,7 @@ variable "enable_autoscaling" {
 }
 
 # Backup Configuration
-variable "enable_backup" {
+variable "backup_enabled" {
   description = "Enable automated backups"
   type        = bool
   default     = true

@@ -144,11 +144,10 @@ resource "kubernetes_persistent_volume_claim" "elasticsearch" {
         storage = var.storage_size
       }
     }
-    storage_class_name = "gp2"
   }
 
   timeouts {
-    create = "20m"
+    create = "45m"
   }
 }
 
@@ -157,18 +156,23 @@ resource "kubernetes_stateful_set" "elasticsearch" {
   metadata {
     name      = "elasticsearch"
     namespace = kubernetes_namespace.elasticsearch.metadata[0].name
+    labels = {
+      app = "elasticsearch"
+    }
   }
 
+  depends_on = [kubernetes_persistent_volume_claim.elasticsearch]
+
   timeouts {
-    create = "30m"
-    update = "30m"
-    delete = "30m"
+    create = "60m"
+    update = "60m"
+    delete = "60m"
   }
 
   spec {
-    service_name = "elasticsearch"
+    service_name = kubernetes_service.elasticsearch.metadata[0].name
     replicas     = var.replicas
-
+    
     selector {
       match_labels = {
         app = "elasticsearch"
@@ -319,7 +323,6 @@ resource "kubernetes_stateful_set" "elasticsearch" {
             storage = var.storage_size
           }
         }
-        storage_class_name = "gp2"
       }
     }
   }
