@@ -2,7 +2,7 @@
 
 **Enterprise-grade Elasticsearch monitoring stack deployed with Infrastructure as Code (IaC) and automated CI/CD pipelines.**
 
-[![CI/CD Pipeline](https://github.com/yourusername/elastic-terraform/workflows/Terraform%20Infrastructure%20Pipeline/badge.svg)](https://github.com/yourusername/elastic-terraform/actions)
+[![CI/CD Pipeline](https://github.com/InfraPlatformer/elastic-terraform-demo/workflows/Terraform%20Infrastructure%20Pipeline/badge.svg)](https://github.com/InfraPlatformer/elastic-terraform-demo/actions)
 [![Terraform](https://img.shields.io/badge/Terraform-1.5+-blue.svg)](https://www.terraform.io/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.28+-blue.svg)](https://kubernetes.io/)
 [![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8.5+-green.svg)](https://www.elastic.co/)
@@ -64,8 +64,8 @@ This project provides a complete, production-ready Elasticsearch monitoring stac
 ### **1. Clone Repository**
 
 ```bash
-git clone https://github.com/yourusername/elastic-terraform.git
-cd elastic-terraform
+git clone https://github.com/InfraPlatformer/elastic-terraform-demo.git
+cd elastic-terraform-demo
 ```
 
 ### **2. Configure AWS Credentials**
@@ -248,8 +248,8 @@ elastic-terraform/
 ### **Getting Help**
 
 - 📖 [Documentation](docs/)
-- 🐛 [Issues](https://github.com/yourusername/elastic-terraform/issues)
-- 💬 [Discussions](https://github.com/yourusername/elastic-terraform/discussions)
+- 🐛 [Issues](https://github.com/InfraPlatformer/elastic-terraform-demo/issues)
+- 💬 [Discussions](https://github.com/InfraPlatformer/elastic-terraform-demo/discussions)
 
 ## 🤝 **Contributing**
 
@@ -275,7 +275,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **⭐ Star this repository if you find it helpful!**
 
 **🔗 Connect with us:**
-- [GitHub](https://github.com/yourusername)
-- [LinkedIn](https://linkedin.com/in/yourusername)
-- [Twitter](https://twitter.com/yourusername)
+- [GitHub](https://github.com/InfraPlatformer)
+- [LinkedIn](https://linkedin.com/in/InfraPlatformer)
+- [Twitter](https://twitter.com/InfraPlatformer)
 # Pipeline Test - 08/30/2025 09:36:11

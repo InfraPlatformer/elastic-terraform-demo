@@ -22,8 +22,8 @@ This guide will help you create and set up your GitHub repository for the Advanc
 
 ```bash
 # Clone your new repository
-git clone https://github.com/yourusername/elastic-terraform.git
-cd elastic-terraform
+git clone https://github.com/InfraPlatformer/elastic-terraform-demo.git
+cd elastic-terraform-demo
 
 # Copy all project files to this directory
 # (Copy everything from your current project folder)
@@ -127,7 +127,7 @@ elastic-terraform/
 
 ## 🎯 **Next Steps**
 
-1. **Update README.md**: Replace `yourusername` with your actual GitHub username
+1. **Update README.md**: Replace `yourusername` with your actual GitHub username (already done for this repository)
 2. **Test the pipeline**: Push changes to trigger deployments
 3. **Share with team**: Invite collaborators
 4. **Monitor deployments**: Check Actions tab regularly
@@ -137,10 +137,10 @@ elastic-terraform/
 
 ## 🔗 **Useful Links**
 
-- **Repository**: `https://github.com/yourusername/elastic-terraform`
-- **Actions**: `https://github.com/yourusername/elastic-terraform/actions`
-- **Issues**: `https://github.com/yourusername/elastic-terraform/issues`
-- **Wiki**: `https://github.com/yourusername/elastic-terraform/wiki`
+- **Repository**: `https://github.com/InfraPlatformer/elastic-terraform-demo`
+- **Actions**: `https://github.com/InfraPlatformer/elastic-terraform-demo/actions`
+- **Issues**: `https://github.com/InfraPlatformer/elastic-terraform-demo/issues`
+- **Wiki**: `https://github.com/InfraPlatformer/elastic-terraform-demo/wiki`
 
 ---
 

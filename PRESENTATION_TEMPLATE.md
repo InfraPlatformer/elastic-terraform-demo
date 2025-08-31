@@ -281,11 +281,11 @@ elastic-terraform/
 
 ### **📞 Get in Touch**
 - **Email**: [your.email@company.com]
-- **LinkedIn**: [linkedin.com/in/yourusername]
-- **GitHub**: [github.com/yourusername]
+- **LinkedIn**: [linkedin.com/in/InfraPlatformer]
+- **GitHub**: [github.com/InfraPlatformer]
 
 ### **📚 Resources**
-- **Project Repository**: [github.com/yourusername/elastic-terraform]
+- **Project Repository**: [github.com/InfraPlatformer/elastic-terraform-demo]
 - **Documentation**: [docs.company.com/elastic-terraform]
 - **Tutorials**: [company.com/tutorials]
 - **Support**: [support.company.com]

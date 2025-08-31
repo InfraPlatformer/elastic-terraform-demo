@@ -28,7 +28,7 @@ This project and everyone participating in it is governed by our Code of Conduct
 ## 💡 **How Can I Contribute?**
 
 ### **Report Bugs**
-- Use the [GitHub issue tracker](https://github.com/yourusername/elastic-terraform/issues)
+- Use the [GitHub issue tracker](https://github.com/InfraPlatformer/elastic-terraform-demo/issues)
 - Include detailed steps to reproduce the bug
 - Provide environment information (OS, Terraform version, etc.)
 - Include error messages and logs
@@ -59,8 +59,8 @@ This project and everyone participating in it is governed by our Code of Conduct
 ```bash
 # Fork the repository on GitHub
 # Then clone your fork
-git clone https://github.com/yourusername/elastic-terraform.git
-cd elastic-terraform
+git clone https://github.com/InfraPlatformer/elastic-terraform-demo.git
+cd elastic-terraform-demo
 
 # Add upstream remote
 git remote add upstream https://github.com/original-owner/elastic-terraform.git

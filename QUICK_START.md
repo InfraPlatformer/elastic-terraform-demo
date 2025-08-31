@@ -40,8 +40,8 @@ aws configure
 
 ### **1. Clone Repository**
 ```bash
-git clone https://github.com/yourusername/elastic-terraform.git
-cd elastic-terraform
+git clone https://github.com/InfraPlatformer/elastic-terraform-demo.git
+cd elastic-terraform-demo
 ```
 
 ### **2. Deploy Development Environment**

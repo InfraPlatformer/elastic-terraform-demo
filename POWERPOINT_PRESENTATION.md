@@ -458,8 +458,8 @@ Questions & Discussion
 
 📞 Get in Touch
 • Email: [your.email@company.com]
-• GitHub: [github.com/yourusername]
-• LinkedIn: [linkedin.com/in/yourusername]
+• GitHub: [github.com/InfraPlatformer]
+• LinkedIn: [linkedin.com/in/InfraPlatformer]
 ```
 
 ### **Speaker Notes:**
@@ -482,10 +482,10 @@ Contact & Resources
 • [Your Name] - [Your Title]
 • Email: [your.email@company.com]
 • Phone: [Your Phone Number]
-• LinkedIn: [linkedin.com/in/yourusername]
+• LinkedIn: [linkedin.com/in/InfraPlatformer]
 
 📚 Project Resources
-• Repository: [github.com/yourusername/elastic-terraform]
+• Repository: [github.com/InfraPlatformer/elastic-terraform-demo]
 • Documentation: [docs.company.com/elastic-terraform]
 • Demo Environment: [demo.company.com]
 • Support: [support.company.com]

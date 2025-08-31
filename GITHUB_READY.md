@@ -40,8 +40,8 @@ Your Advanced Elasticsearch & Terraform Infrastructure project is now **complete
 ### **2. Upload Your Project**
 ```bash
 # Clone the new repository
-git clone https://github.com/yourusername/elastic-terraform.git
-cd elastic-terraform
+git clone https://github.com/InfraPlatformer/elastic-terraform-demo.git
+cd elastic-terraform-demo
 
 # Copy all project files here
 # (Copy everything from your current project folder)
@@ -85,10 +85,10 @@ git push origin main
 
 Once you create the repository, you'll have:
 
-- **Main Repository**: `https://github.com/yourusername/elastic-terraform`
-- **CI/CD Actions**: `https://github.com/yourusername/elastic-terraform/actions`
-- **Issues & Discussions**: `https://github.com/yourusername/elastic-terraform/issues`
-- **Wiki & Documentation**: `https://github.com/yourusername/elastic-terraform/wiki`
+- **Main Repository**: `https://github.com/InfraPlatformer/elastic-terraform-demo`
+- **CI/CD Actions**: `https://github.com/InfraPlatformer/elastic-terraform-demo/actions`
+- **Issues & Discussions**: `https://github.com/InfraPlatformer/elastic-terraform-demo/issues`
+- **Wiki & Documentation**: `https://github.com/InfraPlatformer/elastic-terraform-demo/wiki`
 
 ---
 

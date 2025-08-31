@@ -2,7 +2,7 @@
 
 **Enterprise-grade Elasticsearch monitoring stack deployed with Infrastructure as Code (IaC) and automated CI/CD pipelines.**
 
-[![CI/CD Pipeline](https://github.com/yourusername/elastic-terraform/workflows/Terraform%20Infrastructure%20Pipeline/badge.svg)](https://github.com/yourusername/elastic-terraform/actions)
+[![CI/CD Pipeline](https://github.com/InfraPlatformer/elastic-terraform-demo/workflows/Terraform%20Infrastructure%20Pipeline/badge.svg)](https://github.com/InfraPlatformer/elastic-terraform-demo/actions)
 [![Terraform](https://img.shields.io/badge/Terraform-1.5+-blue.svg)](https://www.terraform.io/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.28+-blue.svg)](https://kubernetes.io/)
 [![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8.5+-yellow.svg)](https://www.elastic.co/)
@@ -103,8 +103,8 @@ This project provides a complete, production-ready infrastructure for deploying 
 
 ### **1. Clone the Repository**
 ```bash
-git clone https://github.com/yourusername/elastic-terraform.git
-cd elastic-terraform
+git clone https://github.com/InfraPlatformer/elastic-terraform-demo.git
+cd elastic-terraform-demo
 ```
 
 ### **2. Configure AWS Credentials**
@@ -242,8 +242,8 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 ### **Development Setup**
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/elastic-terraform.git
-cd elastic-terraform
+git clone https://github.com/InfraPlatformer/elastic-terraform-demo.git
+cd elastic-terraform-demo
 
 # Add upstream remote
 git remote add upstream https://github.com/original-owner/elastic-terraform.git
@@ -271,9 +271,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 **Support**
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/elastic-terraform/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/elastic-terraform/discussions)
-- **Wiki**: [Project Wiki](https://github.com/yourusername/elastic-terraform/wiki)
+- **Issues**: [GitHub Issues](https://github.com/InfraPlatformer/elastic-terraform-demo/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/InfraPlatformer/elastic-terraform-demo/discussions)
+- **Wiki**: [Project Wiki](https://github.com/InfraPlatformer/elastic-terraform-demo/wiki)
 
 ---
 
