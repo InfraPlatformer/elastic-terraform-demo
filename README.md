@@ -1,6 +1,6 @@
 # 🚀 Advanced Elasticsearch & Terraform Infrastructure
 
-**Enterprise-grade Elasticsearch monitoring stack deployed with Infrastructure as Code (IaC) and automated CI/CD pipelines across multiple cloud providers.**
+**Enterprise-grade Elasticsearch monitoring stack deployed with Infrastructure as Code (IaC) and automated CI/CD pipelines across multiple cloud providers (AWS EKS + Azure AKS).**
 
 [![CI/CD Pipeline](https://github.com/InfraPlatformer/elastic-terraform-demo/workflows/Terraform%20Infrastructure%20Pipeline/badge.svg)](https://github.com/InfraPlatformer/elastic-terraform-demo/actions)
 [![Terraform](https://img.shields.io/badge/Terraform-1.5+-blue.svg)](https://www.terraform.io/)
