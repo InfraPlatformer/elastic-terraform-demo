@@ -300,4 +300,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [GitHub](https://github.com/InfraPlatformer)
 - [LinkedIn](https://linkedin.com/in/InfraPlatformer)
 - [Twitter](https://twitter.com/InfraPlatformer)
-# Multi-Cloud Setup Complete - 01/03/2025
+# Multi-Cloud Setup Complete - 01/03/2025 - Azure AKS + AWS EKS
