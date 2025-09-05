@@ -1,0 +1,36 @@
+# Simple Elasticsearch Configuration for Staging
+clusterName: "elasticsearch-staging"
+
+# Resource Configuration
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "2Gi"
+  limits:
+    cpu: "2000m"
+    memory: "4Gi"
+
+# Replica Configuration
+replicas: 3
+
+# Storage Configuration
+volumeClaimTemplate:
+  spec:
+    accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: 100Gi
+    storageClassName: "gp2"
+
+# JVM Configuration
+esJavaOpts: "-Xms1g -Xmx1g"
+
+# Node Selector for Elasticsearch nodes
+nodeSelector:
+  nodegroup: elasticsearch
+
+# Disable security for staging
+esConfig:
+  elasticsearch.yml: |
+    xpack.security.enabled: false
+

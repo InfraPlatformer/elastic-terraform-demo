@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-monitoring-config
+  namespace: monitoring
+data:
+  elasticsearch-alerts.yml: |
+    groups:
+    - name: elasticsearch
+      rules:
+      - alert: ElasticsearchClusterDown
+        expr: elasticsearch_cluster_health_status{cluster="docker-cluster"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Elasticsearch cluster is down"
+          description: "Elasticsearch cluster {{ $labels.cluster }} is down for more than 1 minute"
+      
+      - alert: ElasticsearchClusterYellow
+        expr: elasticsearch_cluster_health_status{cluster="docker-cluster"} == 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Elasticsearch cluster is yellow"
+          description: "Elasticsearch cluster {{ $labels.cluster }} is in yellow state for more than 2 minutes"
+      
+      - alert: ElasticsearchHighJVMHeapUsage
+        expr: (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High JVM heap usage"
+          description: "JVM heap usage is {{ $value }}% for more than 5 minutes"
+      
+      - alert: ElasticsearchHighDiskUsage
+        expr: (elasticsearch_filesystem_data_used_bytes / elasticsearch_filesystem_data_total_bytes) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is {{ $value }}% for more than 5 minutes"
+      
+      - alert: ElasticsearchSlowQueries
+        expr: elasticsearch_indices_search_query_time_seconds > 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow Elasticsearch queries"
+          description: "Query time is {{ $value }}s for more than 2 minutes"

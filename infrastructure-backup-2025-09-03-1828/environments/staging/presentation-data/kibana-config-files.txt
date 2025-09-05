@@ -1,0 +1,17 @@
+kibana-configmap.yaml
+kibana-deployment.yaml
+kibana-final.yaml
+kibana-fixed.yaml
+kibana-https-working.yaml
+kibana-loadbalancer.yaml
+kibana-nodeport.yaml
+kibana-production-ready.yaml
+kibana-service-account.yaml
+kibana-simple-deployment.yaml
+kibana-simple-working.yaml
+kibana-simple.yaml
+kibana-values-staging.yaml
+kibana-working-config-fixed.yaml
+kibana-working-final-fixed.yaml
+kibana-working-final.yaml
+kibana-working.yaml

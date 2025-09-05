@@ -1,0 +1,7 @@
+capture-presentation-data.ps1
+deploy-kibana-access.ps1
+deploy-kibana-production.ps1
+fix-kibana-complete.ps1
+kibana-port-forward.ps1
+quick-deploy-kibana.ps1
+restart-cluster-and-capture.ps1

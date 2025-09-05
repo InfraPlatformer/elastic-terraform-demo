@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Config
+preferences:
+  colors: true
+clusters:
+- name: elasticsearch-cluster-dev
+  cluster:
+    server: https://7528E5D0B71723C434306BA5F4255C36.gr7.us-west-2.eks.amazonaws.com
+    certificate-authority-data: DATA+OMITTED
+    # Connection timeout settings
+    timeout: 30s
+    # Keep-alive settings
+    tcp-keep-alive: true
+    # HTTP/2 settings
+    http2: true
+contexts:
+- name: elasticsearch-cluster-dev
+  context:
+    cluster: elasticsearch-cluster-dev
+    user: elasticsearch-cluster-dev
+    namespace: elasticsearch
+current-context: elasticsearch-cluster-dev
+users:
+- name: elasticsearch-cluster-dev
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      command: aws
+      args:
+      - --region
+      - us-west-2
+      - eks
+      - get-token
+      - --cluster-name
+      - elasticsearch-cluster-dev
+      - --output
+      - json
+      env: null
+      interactiveMode: IfAvailable
+      provideClusterInfo: false

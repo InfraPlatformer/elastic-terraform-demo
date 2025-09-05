@@ -1,0 +1,3 @@
+NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+elasticsearch  1/1     1            1           5m
+kibana         1/1     1            1           4m

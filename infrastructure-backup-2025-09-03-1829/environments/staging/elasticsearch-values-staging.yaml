@@ -1,0 +1,65 @@
+# Elasticsearch Configuration for Staging
+clusterName: "elasticsearch-staging"
+nodeGroup: "default"
+
+# Resource Configuration
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "2Gi"
+  limits:
+    cpu: "2000m"
+    memory: "4Gi"
+
+# Replica Configuration
+replicas: 3
+
+# Storage Configuration
+volumeClaimTemplate:
+  spec:
+    accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: 100Gi
+    storageClassName: "gp2"
+
+# Security Configuration
+esConfig:
+  elasticsearch.yml: |
+    cluster.name: elasticsearch-staging
+    node.name: ${HOSTNAME}
+    network.host: 0.0.0.0
+    discovery.seed_hosts: ["elasticsearch-staging-default-headless"]
+    cluster.initial_master_nodes: ["elasticsearch-staging-default-0", "elasticsearch-staging-default-1", "elasticsearch-staging-default-2"]
+    xpack.security.enabled: false
+
+# JVM Configuration
+esJavaOpts: "-Xms1g -Xmx1g"
+
+# Service Configuration
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 9200
+      targetPort: 9200
+    - name: transport
+      port: 9300
+      targetPort: 9300
+
+# Node Selector for Elasticsearch nodes
+nodeSelector:
+  nodegroup: elasticsearch
+
+# Anti-affinity for high availability
+podAntiAffinity:
+  preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+            - key: app
+              operator: In
+              values:
+                - elasticsearch
+        topologyKey: kubernetes.io/hostname

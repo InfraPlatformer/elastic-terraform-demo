@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch-azure
+  namespace: elasticsearch
+  labels:
+    app: elasticsearch-azure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch-azure
+  template:
+    metadata:
+      labels:
+        app: elasticsearch-azure
+    spec:
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        env:
+        - name: discovery.type
+          value: "single-node"
+        - name: xpack.security.enabled
+          value: "false"
+        - name: "ES_JAVA_OPTS"
+          value: "-Xms1g -Xmx1g"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-azure-service
+  namespace: elasticsearch
+  labels:
+    app: elasticsearch-azure
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 9200
+    targetPort: 9200
+    protocol: TCP
+  selector:
+    app: elasticsearch-azure
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-azure
+  namespace: elasticsearch
+  labels:
+    app: kibana-azure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana-azure
+  template:
+    metadata:
+      labels:
+        app: kibana-azure
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.11.0
+        ports:
+        - containerPort: 5601
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: "http://elasticsearch-azure-service:9200"
+        - name: xpack.security.enabled
+          value: "false"
+        - name: xpack.fleet.enabled
+          value: "false"
+        - name: xpack.ingestManager.enabled
+          value: "false"
+        - name: telemetry.enabled
+          value: "false"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-azure-service
+  namespace: elasticsearch
+  labels:
+    app: kibana-azure
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5601
+    targetPort: 5601
+    protocol: TCP
+  selector:
+    app: kibana-azure

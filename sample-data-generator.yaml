@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: elasticsearch-data-generator
+  namespace: elasticsearch
+spec:
+  template:
+    spec:
+      containers:
+      - name: data-generator
+        image: curlimages/curl:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Create sample index
+          curl -X PUT "elasticsearch-service:9200/sample-logs" -H 'Content-Type: application/json' -d '{
+            "mappings": {
+              "properties": {
+                "timestamp": { "type": "date" },
+                "level": { "type": "keyword" },
+                "message": { "type": "text" },
+                "service": { "type": "keyword" },
+                "response_time": { "type": "integer" }
+              }
+            }
+          }'
+          
+          # Generate sample data
+          for i in {1..1000}; do
+            curl -X POST "elasticsearch-service:9200/sample-logs/_doc" -H 'Content-Type: application/json' -d "{
+              \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)\",
+              \"level\": \"$([ $((RANDOM % 3)) -eq 0 ] && echo 'ERROR' || [ $((RANDOM % 2)) -eq 0 ] && echo 'WARN' || echo 'INFO')\",
+              \"message\": \"Sample log message $i\",
+              \"service\": \"$([ $((RANDOM % 4)) -eq 0 ] && echo 'web' || [ $((RANDOM % 3)) -eq 0 ] && echo 'api' || [ $((RANDOM % 2)) -eq 0 ] && echo 'db' || echo 'cache')\",
+              \"response_time\": $((RANDOM % 1000 + 10))
+            }"
+            sleep 0.1
+          done
+          
+          # Create some searches to generate metrics
+          for i in {1..50}; do
+            curl -X GET "elasticsearch-service:9200/sample-logs/_search" -H 'Content-Type: application/json' -d '{
+              "query": {
+                "match": {
+                  "message": "sample"
+                }
+              },
+              "size": 10
+            }'
+            sleep 0.2
+          done
+      restartPolicy: Never
+  backoffLimit: 3

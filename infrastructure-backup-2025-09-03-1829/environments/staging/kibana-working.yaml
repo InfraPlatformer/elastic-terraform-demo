@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-working
+  namespace: elasticsearch
+  labels:
+    app: kibana-working
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana-working
+  template:
+    metadata:
+      labels:
+        app: kibana-working
+    spec:
+      nodeSelector:
+        nodegroup: general
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.5.1
+        ports:
+        - containerPort: 5601
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: "https://elasticsearch-staging-master:9200"
+        - name: XPACK_SECURITY_ENABLED
+          value: "false"
+        - name: ELASTICSEARCH_SSL_VERIFY
+          value: "false"
+        - name: ELASTICSEARCH_SSL_ALWAYS_PRESENT_CLIENT_CERT
+          value: "false"
+        - name: ELASTICSEARCH_SSL_VERIFY_HOSTNAME
+          value: "false"
+        - name: ELASTICSEARCH_SERVICEACCOUNTTOKEN
+          value: "AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS10b2tlbi06ZGkxaUJSQ0lTTGVCaGc1TG5fY25qZw"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-working
+  namespace: elasticsearch
+  labels:
+    app: kibana-working
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5601
+    targetPort: 5601
+    protocol: TCP
+  selector:
+    app: kibana-working

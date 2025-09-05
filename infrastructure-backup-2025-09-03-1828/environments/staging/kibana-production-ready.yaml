@@ -1,0 +1,287 @@
+# =============================================================================
+# KIBANA PRODUCTION-READY CONFIGURATION
+# =============================================================================
+# This configuration provides a complete, production-ready Kibana setup
+# with proper security, monitoring, and access options.
+# =============================================================================
+
+---
+# Kibana ConfigMap with Production Settings
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kibana-production-config
+  namespace: elasticsearch
+  labels:
+    app: kibana-production
+    version: "8.5.1"
+data:
+  kibana.yml: |
+    # =============================================================================
+    # SERVER CONFIGURATION
+    # =============================================================================
+    server.host: "0.0.0.0"
+    server.port: 5601
+    server.shutdownTimeout: "5s"
+    server.maxPayloadBytes: 1048576
+    
+    # =============================================================================
+    # ELASTICSEARCH CONNECTION
+    # =============================================================================
+    # Use HTTPS with service account token for security
+    elasticsearch.hosts: ["https://elasticsearch-staging-master:9200"]
+    elasticsearch.serviceAccountToken: "AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS10b2tlbi1uZXc6OExIeEFMa2NRQ2FQeHV1bDh4SWQtQQ"
+    
+    # SSL Configuration
+    elasticsearch.ssl:
+      verificationMode: "none"  # Set to "full" for production with proper certificates
+    
+    # Performance Settings
+    elasticsearch.requestTimeout: 30000
+    elasticsearch.shardTimeout: 30000
+    elasticsearch.pingTimeout: 30000
+    
+    # =============================================================================
+    # SECURITY CONFIGURATION
+    # =============================================================================
+    # Session Management
+    xpack.security.session.idleTimeout: "1h"
+    xpack.security.session.lifespan: "24h"
+    
+    # =============================================================================
+    # MONITORING & LOGGING
+    # =============================================================================
+    logging.appenders:
+      console:
+        type: console
+        layout:
+          type: pattern
+          pattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"
+    
+    logging.loggers:
+      - name: plugins.elasticsearch
+        level: info
+      - name: plugins.reporting
+        level: info
+    
+    # =============================================================================
+    # PERFORMANCE SETTINGS
+    # =============================================================================
+    # Memory and CPU optimization
+    elasticsearch.maxSockets: 100
+    elasticsearch.maxIdleSockets: 10
+    elasticsearch.idleSocketTimeout: 30000
+
+---
+# Kibana Deployment with Production Resources
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-production
+  namespace: elasticsearch
+  labels:
+    app: kibana-production
+    version: "8.5.1"
+    component: "kibana"
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: kibana-production
+  template:
+    metadata:
+      labels:
+        app: kibana-production
+        version: "8.5.1"
+        component: "kibana"
+    spec:
+      serviceAccountName: kibana-service-account
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.5.1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 5601
+          protocol: TCP
+        env:
+        - name: NODE_OPTIONS
+          value: "--max-old-space-size=1024"
+        - name: ELASTICSEARCH_HOSTS
+          value: "https://elasticsearch-staging-master:9200"
+        - name: ELASTICSEARCH_SERVICEACCOUNTTOKEN
+          value: "AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS10b2tlbi1uZXc6OExIeEFMa2NRQ2FQeHV1bDh4SWQtQQ"
+        volumeMounts:
+        - name: kibana-config
+          mountPath: /usr/share/kibana/config/kibana.yml
+          subPath: kibana.yml
+          readOnly: true
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "1Gi"
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+        livenessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 90
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 3
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: kibana-config
+        configMap:
+          name: kibana-production-config
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+
+---
+# ClusterIP Service for Internal Access
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-production
+  namespace: elasticsearch
+  labels:
+    app: kibana-production
+    version: "8.5.1"
+    component: "kibana"
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 5601
+    targetPort: 5601
+    protocol: TCP
+  selector:
+    app: kibana-production
+
+---
+# NodePort Service for Direct Node Access
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-nodeport
+  namespace: elasticsearch
+  labels:
+    app: kibana-production
+    version: "8.5.1"
+    component: "kibana"
+    access-type: "nodeport"
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 5601
+    targetPort: 5601
+    nodePort: 30561
+    protocol: TCP
+  selector:
+    app: kibana-production
+
+---
+# LoadBalancer Service for Public Access
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-loadbalancer
+  namespace: elasticsearch
+  labels:
+    app: kibana-production
+    version: "8.5.1"
+    component: "kibana"
+    access-type: "loadbalancer"
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: "HTTP"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "5601"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: "/api/status"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "30"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout: "10"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold: "2"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "3"
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 5601
+    targetPort: 5601
+    protocol: TCP
+  selector:
+    app: kibana-production
+
+---
+# Service Account for Kibana
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kibana-service-account
+  namespace: elasticsearch
+  labels:
+    app: kibana-production
+    component: "kibana"
+
+---
+# ClusterRole for Kibana
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kibana-cluster-role
+  labels:
+    app: kibana-production
+    component: "kibana"
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["extensions"]
+  resources: ["ingresses"]
+  verbs: ["get", "list", "watch"]
+
+---
+# ClusterRoleBinding for Kibana
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kibana-cluster-role-binding
+  labels:
+    app: kibana-production
+    component: "kibana"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kibana-cluster-role
+subjects:
+- kind: ServiceAccount
+  name: kibana-service-account
+  namespace: elasticsearch
+

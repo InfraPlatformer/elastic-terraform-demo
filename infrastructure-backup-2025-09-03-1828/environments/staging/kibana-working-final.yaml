@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kibana-working-config
+  namespace: elasticsearch
+data:
+  kibana.yml: |
+    server.host: "0.0.0.0"
+    server.shutdownTimeout: "5s"
+    elasticsearch.hosts: ["https://elasticsearch-staging-master:9200"]
+    elasticsearch.username: "elastic"
+    elasticsearch.password: "FvpVTCwGVctECzqt"
+    
+    # SSL Configuration - FIXED
+    elasticsearch.ssl:
+      verificationMode: "none"  # Use "full" in production with proper certs
+      # certificateAuthorities: "/usr/share/kibana/config/certs/ca.crt"  # Remove or fix if using arrays
+    
+    # Required xpack.actions configuration
+    xpack.actions:
+      enabled: true
+      allowedHosts: ['*']
+    
+    # Optional: Disable features you don't need
+    xpack.alerting.enabled: false
+    xpack.observability.enabled: false
+    xpack.security.enabled: false
+    
+    monitoring.ui.container.elasticsearch.enabled: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-working-final
+  namespace: elasticsearch
+  labels:
+    app: kibana-working-final
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana-working-final
+  template:
+    metadata:
+      labels:
+        app: kibana-working-final
+    spec:
+      nodeSelector:
+        nodegroup: general
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.5.1
+        ports:
+        - containerPort: 5601
+        volumeMounts:
+        - name: kibana-config
+          mountPath: /usr/share/kibana/config/kibana.yml
+          subPath: kibana.yml
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "200m"
+            memory: "512Mi"
+      volumes:
+      - name: kibana-config
+        configMap:
+          name: kibana-working-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-working-final
+  namespace: elasticsearch
+  labels:
+    app: kibana-working-final
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5601
+    targetPort: 5601
+    protocol: TCP
+  selector:
+    app: kibana-working-final

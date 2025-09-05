@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-metrics-config
+  namespace: elasticsearch
+data:
+  elasticsearch.yml: |
+    cluster.name: "elasticsearch-dev"
+    node.name: "elasticsearch-node"
+    network.host: 0.0.0.0
+    discovery.type: single-node
+    xpack.security.enabled: false
+    xpack.monitoring.enabled: true
+    xpack.monitoring.collection.enabled: true
+    # Enable metrics endpoint for Prometheus
+    xpack.monitoring.exporters.prometheus:
+      type: prometheus
+      enabled: true
+    # Enable node stats API
+    http.cors.enabled: true
+    http.cors.allow-origin: "*"
+    http.cors.allow-headers: "X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
+    http.cors.allow-credentials: true

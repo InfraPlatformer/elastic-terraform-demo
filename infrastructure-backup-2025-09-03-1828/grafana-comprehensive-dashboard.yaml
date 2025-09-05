@@ -1,0 +1,217 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-elasticsearch-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  elasticsearch-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Elasticsearch Comprehensive Monitoring",
+        "tags": ["elasticsearch", "monitoring", "comprehensive"],
+        "style": "dark",
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Cluster Health Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_cluster_health_status{cluster=\"docker-cluster\"}",
+                "legendFormat": "Status"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0, "text": "Red"},
+                    {"color": "yellow", "value": 1, "text": "Yellow"},
+                    {"color": "green", "value": 2, "text": "Green"}
+                  ]
+                },
+                "mappings": [
+                  {"type": "value", "value": "0", "text": "Red"},
+                  {"type": "value", "value": "1", "text": "Yellow"},
+                  {"type": "value", "value": "2", "text": "Green"}
+                ]
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Number of Nodes",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_cluster_health_number_of_nodes{cluster=\"docker-cluster\"}",
+                "legendFormat": "Nodes"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Active Shards",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_cluster_health_active_shards{cluster=\"docker-cluster\"}",
+                "legendFormat": "Active Shards"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+          },
+          {
+            "id": 4,
+            "title": "Unassigned Shards",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_cluster_health_unassigned_shards{cluster=\"docker-cluster\"}",
+                "legendFormat": "Unassigned"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+          },
+          {
+            "id": 5,
+            "title": "JVM Heap Usage %",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"} * 100",
+                "legendFormat": "Heap Usage %"
+              }
+            ],
+            "yAxes": [
+              {
+                "label": "Percentage",
+                "max": 100,
+                "min": 0
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 6,
+            "title": "JVM Non-Heap Usage %",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "elasticsearch_jvm_memory_used_bytes{area=\"nonheap\"} / elasticsearch_jvm_memory_max_bytes{area=\"nonheap\"} * 100",
+                "legendFormat": "Non-Heap Usage %"
+              }
+            ],
+            "yAxes": [
+              {
+                "label": "Percentage",
+                "max": 100,
+                "min": 0
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          },
+          {
+            "id": 7,
+            "title": "Index Operations Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(elasticsearch_indices_indexing_index_total[5m])",
+                "legendFormat": "Index Operations/sec"
+              },
+              {
+                "expr": "rate(elasticsearch_indices_get_total[5m])",
+                "legendFormat": "Get Operations/sec"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+          },
+          {
+            "id": 8,
+            "title": "Search Operations Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(elasticsearch_indices_search_query_total[5m])",
+                "legendFormat": "Search Queries/sec"
+              },
+              {
+                "expr": "rate(elasticsearch_indices_search_fetch_total[5m])",
+                "legendFormat": "Fetch Operations/sec"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+          },
+          {
+            "id": 9,
+            "title": "Query Time (ms)",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "elasticsearch_indices_search_query_time_seconds * 1000",
+                "legendFormat": "Query Time (ms)"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+          },
+          {
+            "id": 10,
+            "title": "Disk Usage %",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "elasticsearch_filesystem_data_used_bytes / elasticsearch_filesystem_data_total_bytes * 100",
+                "legendFormat": "Disk Usage %"
+              }
+            ],
+            "yAxes": [
+              {
+                "label": "Percentage",
+                "max": 100,
+                "min": 0
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+          },
+          {
+            "id": 11,
+            "title": "Document Count",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "elasticsearch_indices_docs_total",
+                "legendFormat": "Total Documents"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32}
+          },
+          {
+            "id": 12,
+            "title": "Index Size (MB)",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "elasticsearch_indices_store_size_bytes / 1024 / 1024",
+                "legendFormat": "Index Size (MB)"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }

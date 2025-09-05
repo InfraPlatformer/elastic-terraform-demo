@@ -1,0 +1,43 @@
+# Multi-Cloud Elasticsearch Infrastructure - Service URLs
+# Generated: 09/03/2025 18:28:58
+
+## AWS EKS Services
+Elasticsearch: http://aba2ec55e0e98460e8f55e3a19b39718-980465324.us-west-2.elb.amazonaws.com:9200
+Kibana: http://a889eb0585d6249a5aebc367c2bd188b-264552843.us-west-2.elb.amazonaws.com:5601
+Prometheus: http://ae2fd7b361e8148e789025e77d418857-490492219.us-west-2.elb.amazonaws.com:9090
+Grafana: http://a007b9692ccc543aea97874996577ba7-103818889.us-west-2.elb.amazonaws.com:3000
+  Username: admin
+  Password: admin123
+
+## Azure AKS Services
+Elasticsearch: http://20.109.148.166:9200
+Kibana: http://20.252.78.28:5601
+
+## AWS CLI Commands
+# Switch to AWS context
+kubectl config use-context arn:aws:eks:us-west-2:058264491956:cluster/elasticsearch-dev
+
+# Check AWS cluster
+aws eks describe-cluster --name elasticsearch-dev --region us-west-2
+
+# Check AWS pods
+kubectl get pods --all-namespaces -o wide
+
+## Azure CLI Commands
+# Switch to Azure context
+kubectl config use-context elasticsearch-cluster-azure
+
+# Check Azure cluster
+az aks show --resource-group multi-cloud-elastic-rg --name elasticsearch-cluster-azure
+
+# Check Azure pods
+kubectl get pods --all-namespaces -o wide
+
+## Sample Data
+AWS Elasticsearch: 150+ documents in 'sample-logs' index
+Azure Elasticsearch: 50+ documents in 'azure-logs' index
+
+## Monitoring
+Grafana Dashboard: Comprehensive Elasticsearch monitoring
+Prometheus: Metrics collection and alerting
+Kibana: Data visualization and log analysis

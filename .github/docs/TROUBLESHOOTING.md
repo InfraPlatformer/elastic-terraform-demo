@@ -389,3 +389,5 @@ kubectl exec -n elasticsearch deployment/elasticsearch-aws -- curl -s localhost:
 ---
 
 **This troubleshooting guide covers the most common issues and provides step-by-step solutions for your multi-cloud infrastructure.** 🚀
+
+

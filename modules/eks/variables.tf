@@ -70,3 +70,15 @@ variable "node_groups" {
   default = {}
 }
 
+variable "enable_ebs_csi_driver" {
+  description = "Enable AWS EBS CSI Driver for storage"
+  type        = bool
+  default     = true
+}
+
+variable "ebs_csi_driver_version" {
+  description = "Version of AWS EBS CSI Driver to deploy"
+  type        = string
+  default     = "v2.20.0"
+}
+

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kibana-working-config-fixed
+  namespace: elasticsearch
+data:
+  kibana.yml: |
+    # Server Configuration
+    server.host: "0.0.0.0"
+    server.port: 5601
+    server.shutdownTimeout: "5s"
+    
+    # Elasticsearch Connection - Use HTTPS with service account token
+    elasticsearch.hosts: ["https://elasticsearch-staging-master:9200"]
+    elasticsearch.serviceAccountToken: "AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS10b2tlbi1uZXc6OExIeEFMa2NRQ2FQeHV1bDh4SWQtQQ"
+    
+    # SSL Configuration - Disabled for development
+    elasticsearch.ssl:
+      verificationMode: "none"
+    
+    # Performance Settings
+    elasticsearch.requestTimeout: 30000
+    elasticsearch.shardTimeout: 30000

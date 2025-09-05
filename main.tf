@@ -167,8 +167,9 @@ module "aws_eks" {
   ebs_csi_driver_version = var.ebs_csi_driver_version
 }
 
-# Azure AKS Cluster for Multi-Cloud Deployment
+# Azure AKS Cluster for Multi-Cloud Deployment (conditional)
 module "azure_aks" {
+  count  = var.enable_azure_deployment ? 1 : 0
   source = "./modules/azure-aks"
 
   cluster_name        = "${var.cluster_name}-azure"
@@ -247,14 +248,14 @@ module "multi_cloud_elasticsearch" {
   environment  = var.environment
 
   # Enable deployments on both clouds
-  enable_aws_deployment   = true
-  enable_azure_deployment = true
+  enable_aws_deployment   = var.enable_aws_deployment
+  enable_azure_deployment = var.enable_azure_deployment
 
   # AWS EKS cluster reference
   aws_eks_cluster = module.aws_eks
 
-  # Azure AKS cluster reference
-  azure_aks_cluster = module.azure_aks
+  # Azure AKS cluster reference (conditional)
+  azure_aks_cluster = var.enable_azure_deployment ? module.azure_aks[0] : null
 
   # Elasticsearch configuration
   elasticsearch_replicas              = 3

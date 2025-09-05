@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-12-24T19:00:00.000Z" agent="5.0" etag="template" version="22.1.16" type="device">
+  <diagram name="Multi-Cloud Architecture" id="multi-cloud-template">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="Multi-Cloud Elasticsearch Infrastructure" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1;fontColor=#2E2E2E;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="350" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- GitHub Repository -->
+        <mxCell id="github" value="GitHub Repository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6C757D;strokeColor=#495057;fontColor=#FFFFFF;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="100" width="150" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- CI/CD Pipeline -->
+        <mxCell id="cicd" value="CI/CD Pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8B4513;strokeColor=#654321;fontColor=#FFFFFF;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="100" width="150" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- AWS EKS -->
+        <mxCell id="aws" value="🏗️ AWS EKS&#xa;Elasticsearch + Kibana&#xa;$50-800/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#232F3E;fontColor=#FFFFFF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="220" width="180" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Azure AKS -->
+        <mxCell id="azure" value="🔵 Azure AKS&#xa;Elasticsearch + Kibana&#xa;$40-600/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0078D4;strokeColor=#106EBE;fontColor=#FFFFFF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="220" width="180" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Cross-Cloud Connection -->
+        <mxCell id="cross-cloud" value="Cross-Cloud Communication" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=2;dashed=1;fontSize=10;fontColor=#666666;" edge="1" parent="1" source="aws" target="azure">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Development Environment -->
+        <mxCell id="dev" value="🏗️ Development&#xa;$90-180/month&#xa;15 min deploy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#28A745;strokeColor=#1E7E34;fontColor=#FFFFFF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="380" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Staging Environment -->
+        <mxCell id="staging" value="🚀 Staging&#xa;$270-550/month&#xa;10 min deploy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#17A2B8;strokeColor=#138496;fontColor=#FFFFFF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="380" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Production Environment -->
+        <mxCell id="prod" value="🔒 Production&#xa;$550-1400/month&#xa;Manual approval" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DC3545;strokeColor=#C82333;fontColor=#FFFFFF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="380" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Security & Monitoring -->
+        <mxCell id="security" value="🔐 Security &amp; Monitoring&#xa;X-Pack + Prometheus + Grafana" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6F42C1;strokeColor=#5A2D82;fontColor=#FFFFFF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="520" width="250" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Connections -->
+        <mxCell id="conn1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="github" target="cicd">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="conn2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="cicd" target="aws">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="conn3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="cicd" target="azure">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="conn4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="cicd" target="dev">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="conn5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="cicd" target="staging">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="conn6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="cicd" target="prod">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="conn7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="aws" target="security">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="conn8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="azure" target="security">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

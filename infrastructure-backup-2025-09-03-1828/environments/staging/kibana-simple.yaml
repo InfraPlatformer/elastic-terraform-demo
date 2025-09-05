@@ -1,0 +1,26 @@
+# Simple Kibana Configuration for Staging
+elasticsearchHosts: "http://elasticsearch-staging-master:9200"
+
+# Resource Configuration
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1000m"
+    memory: "2Gi"
+
+# Service Configuration
+service:
+  type: ClusterIP
+
+# Node Selector for general nodes
+nodeSelector:
+  nodegroup: general
+
+# Skip security setup
+esConfig:
+  kibana.yml: |
+    elasticsearch.hosts: ["http://elasticsearch-staging-master:9200"]
+    xpack.security.enabled: false
+

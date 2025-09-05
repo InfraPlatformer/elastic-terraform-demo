@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-final
+  namespace: elasticsearch
+  labels:
+    app: kibana-final
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana-final
+  template:
+    metadata:
+      labels:
+        app: kibana-final
+    spec:
+      nodeSelector:
+        nodegroup: general
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.5.1
+        ports:
+        - containerPort: 5601
+        volumeMounts:
+        - name: kibana-config
+          mountPath: /usr/share/kibana/config/kibana.yml
+          subPath: kibana.yml
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+      volumes:
+      - name: kibana-config
+        configMap:
+          name: kibana-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-final
+  namespace: elasticsearch
+  labels:
+    app: kibana-final
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5601
+    targetPort: 5601
+    protocol: TCP
+  selector:
+    app: kibana-final
+

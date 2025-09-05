@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kibana-fixed-config
+  namespace: elasticsearch
+data:
+  kibana.yml: |
+    server.host: "0.0.0.0"
+    server.port: 5601
+    
+    # Fix 1: SSL Configuration - Disable SSL verification
+    elasticsearch.hosts: ["https://elasticsearch-staging-master:9200"]
+    elasticsearch.ssl.verify: false
+    elasticsearch.ssl.alwaysPresentClientCert: false
+    elasticsearch.ssl.verifyHostname: false
+    elasticsearch.ssl.rejectUnauthorized: false
+    
+    # Fix 2: Service Account Token (not elastic user)
+    elasticsearch.serviceAccountToken: "AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS10b2tlbi06ZGkxaUJSQ0lTTGVCaGc1TG5fY25qZw"
+    
+    # Fix 3: Encryption Keys
+    xpack.encryptedSavedObjects.encryptionKey: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    xpack.reporting.encryptionKey: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-fixed
+  namespace: elasticsearch
+  labels:
+    app: kibana-fixed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana-fixed
+  template:
+    metadata:
+      labels:
+        app: kibana-fixed
+    spec:
+      nodeSelector:
+        nodegroup: general
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.5.1
+        ports:
+        - containerPort: 5601
+        volumeMounts:
+        - name: kibana-config
+          mountPath: /usr/share/kibana/config/kibana.yml
+          subPath: kibana.yml
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+      volumes:
+      - name: kibana-config
+        configMap:
+          name: kibana-fixed-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-fixed
+  namespace: elasticsearch
+  labels:
+    app: kibana-fixed
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5601
+    targetPort: 5601
+    protocol: TCP
+  selector:
+    app: kibana-fixed

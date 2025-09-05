@@ -1,0 +1,43 @@
+{
+    "nodegroup": {
+        "nodegroupName": "development-nodes",
+        "nodegroupArn": "arn:aws:eks:us-west-2:058264491956:nodegroup/elasticsearch-dev/development-nodes/14cc87f2-0434-c3b5-2026-af6832874df7",
+        "clusterName": "elasticsearch-dev",
+        "version": "1.33",
+        "releaseVersion": "1.33.3-20250829",
+        "createdAt": "2025-09-03T15:03:48.138000+01:00",
+        "modifiedAt": "2025-09-03T18:24:40.470000+01:00",
+        "status": "ACTIVE",
+        "capacityType": "ON_DEMAND",
+        "scalingConfig": {
+            "minSize": 1,
+            "maxSize": 3,
+            "desiredSize": 2
+        },
+        "instanceTypes": [
+            "t3.medium"
+        ],
+        "subnets": [
+            "subnet-013906104d395536e",
+            "subnet-0c059b149c71db1ac"
+        ],
+        "amiType": "AL2023_x86_64_STANDARD",
+        "nodeRole": "arn:aws:iam::058264491956:role/elasticsearch-dev-node-group-role",
+        "labels": {},
+        "resources": {
+            "autoScalingGroups": [
+                {
+                    "name": "eks-development-nodes-14cc87f2-0434-c3b5-2026-af6832874df7"
+                }
+            ]
+        },
+        "diskSize": 20,
+        "health": {
+            "issues": []
+        },
+        "updateConfig": {
+            "maxUnavailable": 1
+        },
+        "tags": {}
+    }
+}

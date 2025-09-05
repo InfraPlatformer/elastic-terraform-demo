@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch-exporter
+  namespace: monitoring
+  labels:
+    app: elasticsearch-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch-exporter
+  template:
+    metadata:
+      labels:
+        app: elasticsearch-exporter
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9114"
+    spec:
+      containers:
+      - name: elasticsearch-exporter
+        image: justwatch/elasticsearch_exporter:1.1.0
+        ports:
+        - containerPort: 9114
+        env:
+        - name: ES_URI
+          value: "http://elasticsearch-service.elasticsearch.svc.cluster.local:9200"
+        - name: ES_ALL
+          value: "true"
+        - name: ES_INDICES
+          value: "true"
+        - name: ES_INDICES_SETTINGS
+          value: "true"
+        - name: ES_SNAPSHOTS
+          value: "true"
+        - name: ES_CLUSTERHEALTH
+          value: "true"
+        - name: ES_CLUSTERHEALTH_LEVEL
+          value: "indices"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-exporter-service
+  namespace: monitoring
+  labels:
+    app: elasticsearch-exporter
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9114
+    targetPort: 9114
+    protocol: TCP
+  selector:
+    app: elasticsearch-exporter

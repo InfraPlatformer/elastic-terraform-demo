@@ -1,0 +1,5 @@
+Port Forwarding: Pod not found
+LoadBalancer: External IP not available
+NodePort: Not configured
+Login Username: elastic
+Login Password: FvpVTCwGVctECzqt

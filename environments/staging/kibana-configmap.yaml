@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kibana-config
+  namespace: elasticsearch
+data:
+  kibana.yml: |
+    server.host: "0.0.0.0"
+    server.port: 5601
+    
+    elasticsearch.hosts: ["https://elasticsearch-staging-master:9200"]
+    elasticsearch.ssl.verify: false
+    elasticsearch.ssl.alwaysPresentClientCert: false
+    elasticsearch.ssl.verifyHostname: false
+    
+    xpack.encryptedSavedObjects.encryptionKey: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    xpack.reporting.encryptionKey: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    
+    # Service account token authentication
+    elasticsearch.serviceAccountToken: "AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS10b2tlbi06ZGkxaUJSQ0lTTGVCaGc1TG5fY25qZw"

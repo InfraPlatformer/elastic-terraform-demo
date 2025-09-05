@@ -21,13 +21,89 @@ resource "aws_security_group" "eks_cluster_enhanced" {
     self             = false
   }
 
-
-
   # Allow cluster to communicate with nodes
   ingress {
     description      = "Allow cluster to communicate with nodes"
     from_port        = 10250
     to_port          = 10250
+    protocol         = "tcp"
+    cidr_blocks      = [var.vpc_cidr]
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
+  }
+
+  # Allow Elasticsearch HTTP access from VPC
+  ingress {
+    description      = "Allow Elasticsearch HTTP access from VPC"
+    from_port        = 9200
+    to_port          = 9200
+    protocol         = "tcp"
+    cidr_blocks      = [var.vpc_cidr]
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
+  }
+
+  # Allow Elasticsearch transport access from VPC
+  ingress {
+    description      = "Allow Elasticsearch transport access from VPC"
+    from_port        = 9300
+    to_port          = 9300
+    protocol         = "tcp"
+    cidr_blocks      = [var.vpc_cidr]
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
+  }
+
+  # Allow Kibana access from VPC
+  ingress {
+    description      = "Allow Kibana access from VPC"
+    from_port        = 5601
+    to_port          = 5601
+    protocol         = "tcp"
+    cidr_blocks      = [var.vpc_cidr]
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
+  }
+
+  # Allow LoadBalancer health checks
+  ingress {
+    description      = "Allow LoadBalancer health checks"
+    from_port        = 0
+    to_port          = 65535
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
+  }
+
+  # Allow Prometheus monitoring access
+  ingress {
+    description      = "Allow Prometheus monitoring access"
+    from_port        = 9090
+    to_port          = 9090
+    protocol         = "tcp"
+    cidr_blocks      = [var.vpc_cidr]
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
+  }
+
+  # Allow Grafana access
+  ingress {
+    description      = "Allow Grafana access"
+    from_port        = 3000
+    to_port          = 3000
     protocol         = "tcp"
     cidr_blocks      = [var.vpc_cidr]
     ipv6_cidr_blocks = []

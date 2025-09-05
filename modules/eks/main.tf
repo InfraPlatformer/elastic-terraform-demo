@@ -83,7 +83,7 @@ resource "aws_eks_node_group" "main" {
 resource "aws_eks_addon" "vpc_cni" {
   cluster_name = aws_eks_cluster.main.name
   addon_name   = "vpc-cni"
-  # Let Terraform auto-select compatible version
+  # Let EKS auto-select compatible version - this prevents version compatibility errors
   # addon_version = "v1.18.0-eksbuild.1"
 
   resolve_conflicts_on_create = "OVERWRITE"
@@ -101,7 +101,7 @@ resource "aws_eks_addon" "vpc_cni" {
 resource "aws_eks_addon" "coredns" {
   cluster_name = aws_eks_cluster.main.name
   addon_name   = "coredns"
-  # Let Terraform auto-select compatible version
+  # Let EKS auto-select compatible version - this prevents version compatibility errors
   # addon_version = "v1.11.1-eksbuild.4"
 
   resolve_conflicts_on_create = "OVERWRITE"
@@ -119,7 +119,7 @@ resource "aws_eks_addon" "coredns" {
 resource "aws_eks_addon" "kube_proxy" {
   cluster_name = aws_eks_cluster.main.name
   addon_name   = "kube-proxy"
-  # Let Terraform auto-select compatible version
+  # Let EKS auto-select compatible version - this prevents version compatibility errors
   # addon_version = "v1.29.0-eksbuild.1"
 
   resolve_conflicts_on_update = "OVERWRITE"
@@ -134,10 +134,11 @@ resource "aws_eks_addon" "kube_proxy" {
 
 # AWS EBS CSI Driver Add-on (CRITICAL - Storage)
 resource "aws_eks_addon" "aws_ebs_csi_driver" {
+  count       = var.enable_ebs_csi_driver ? 1 : 0
   cluster_name = aws_eks_cluster.main.name
   addon_name   = "aws-ebs-csi-driver"
-  # Let Terraform auto-select compatible version
-  # addon_version = "v2.20.0-eksbuild.1"
+  # Let EKS auto-select compatible version - this fixes the version compatibility error
+  # addon_version = var.ebs_csi_driver_version
 
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"

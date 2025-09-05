@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: elasticsearch
+  labels:
+    app: kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.11.0
+        ports:
+        - containerPort: 5601
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: "http://elasticsearch-service:9200"
+        - name: SERVER_NAME
+          value: "kibana"
+        - name: SERVER_HOST
+          value: "0.0.0.0"
+        - name: XPACK_SECURITY_ENABLED
+          value: "false"
+        - name: XPACK_FLEET_ENABLED
+          value: "false"
+        - name: XPACK_INGEST_MANAGER_ENABLED
+          value: "false"
+        - name: TELEMETRY_ENABLED
+          value: "false"
+        - name: XPACK_TELEMETRY_ENABLED
+          value: "false"
+        - name: XPACK_CLOUD_ENABLED
+          value: "false"
+        - name: XPACK_CLOUD_SECURITY_POSTURE_ENABLED
+          value: "false"
+        - name: XPACK_CLOUD_DEFEND_ENABLED
+          value: "false"
+        - name: XPACK_CLOUD_EXPERIMENTS_ENABLED
+          value: "false"
+        - name: XPACK_CLOUD_INTEGRATIONS_ENABLED
+          value: "false"
+        - name: XPACK_ML_ENABLED
+          value: "false"
+        - name: XPACK_WATCHER_ENABLED
+          value: "false"
+        - name: XPACK_GRAPH_ENABLED
+          value: "false"
+        - name: XPACK_REPORTING_ENABLED
+          value: "false"
+        - name: XPACK_CANVAS_ENABLED
+          value: "false"
+        - name: XPACK_MAPS_ENABLED
+          value: "false"
+        - name: XPACK_UPTIME_ENABLED
+          value: "false"
+        - name: XPACK_APM_ENABLED
+          value: "false"
+        - name: XPACK_INFRA_ENABLED
+          value: "false"
+        - name: XPACK_LOGS_ENABLED
+          value: "false"
+        - name: XPACK_METRICS_ENABLED
+          value: "false"
+        - name: XPACK_SYNTHETICS_ENABLED
+          value: "false"
+        - name: XPACK_OBSERVABILITY_ENABLED
+          value: "false"
+        - name: XPACK_HOME_ENABLED
+          value: "false"
+        - name: NEWSFEED_ENABLED
+          value: "false"
+        - name: XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY
+          value: "something_at_least_32_characters_long"
+        - name: XPACK_REPORTING_ENCRYPTIONKEY
+          value: "something_at_least_32_characters_long"
+        - name: XPACK_SECURITY_ENCRYPTIONKEY
+          value: "something_at_least_32_characters_long"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 90
+          timeoutSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 180
+          timeoutSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-service
+  namespace: elasticsearch
+  labels:
+    app: kibana
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5601
+    targetPort: 5601
+    protocol: TCP
+  selector:
+    app: kibana

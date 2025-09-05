@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-working-final-fixed
+  namespace: elasticsearch
+  labels:
+    app: kibana-working-final-fixed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana-working-final-fixed
+  template:
+    metadata:
+      labels:
+        app: kibana-working-final-fixed
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.5.1
+        ports:
+        - containerPort: 5601
+        volumeMounts:
+        - name: kibana-config
+          mountPath: /usr/share/kibana/config/kibana.yml
+          subPath: kibana.yml
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "128Mi"
+          limits:
+            cpu: "100m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 90
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 5
+      volumes:
+      - name: kibana-config
+        configMap:
+          name: kibana-working-config-fixed
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-working-final-fixed
+  namespace: elasticsearch
+  labels:
+    app: kibana-working-final-fixed
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5601
+    targetPort: 5601
+    protocol: TCP
+  selector:
+    app: kibana-working-final-fixed
