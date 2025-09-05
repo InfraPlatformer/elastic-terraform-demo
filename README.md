@@ -1,6 +1,6 @@
 # 🚀 Advanced Elasticsearch & Terraform Infrastructure
 
-**Enterprise-grade Elasticsearch monitoring stack deployed with Infrastructure as Code (IaC) and automated CI/CD pipelines.**
+**Enterprise-grade Elasticsearch monitoring stack deployed with Infrastructure as Code (IaC) and automated CI/CD pipelines across multiple cloud providers.**
 
 [![CI/CD Pipeline](https://github.com/InfraPlatformer/elastic-terraform-demo/workflows/Terraform%20Infrastructure%20Pipeline/badge.svg)](https://github.com/InfraPlatformer/elastic-terraform-demo/actions)
 [![Terraform](https://img.shields.io/badge/Terraform-1.5+-blue.svg)](https://www.terraform.io/)
@@ -9,11 +9,12 @@
 
 ## 🎯 **Project Overview**
 
-This project provides a complete, production-ready Elasticsearch monitoring stack deployed on AWS EKS using Terraform and Helm. It includes automated CI/CD pipelines, multi-environment support, and enterprise-grade security features.
+This project provides a complete, production-ready Elasticsearch monitoring stack deployed across multiple cloud providers (AWS EKS and Azure AKS) using Terraform. It includes automated CI/CD pipelines, multi-environment support, enterprise-grade security features, and true multi-cloud capabilities.
 
 ### **✨ Key Features**
 
-- 🏗️ **Infrastructure as Code** - Complete AWS infrastructure defined in Terraform
+- 🏗️ **Infrastructure as Code** - Complete multi-cloud infrastructure defined in Terraform
+- 🌐 **Multi-Cloud Support** - Deploy on AWS EKS, Azure AKS, or both simultaneously
 - 🚀 **Automated CI/CD** - GitHub Actions pipeline with multi-environment deployment
 - 🔒 **Enterprise Security** - X-Pack security, SSL/TLS, and RBAC
 - 📊 **Monitoring Stack** - Elasticsearch, Kibana, and comprehensive monitoring
@@ -43,10 +44,11 @@ This project provides a complete, production-ready Elasticsearch monitoring stac
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                    AWS Infrastructure                       │
+│                    Multi-Cloud Infrastructure               │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
-│  │     VPC     │  │   EKS       │  │   Elasticsearch     │ │
-│  │  Networking │  │   Cluster   │  │   + Kibana Stack    │ │
+│  │     AWS     │  │    Azure    │  │   Elasticsearch     │ │
+│  │     EKS     │  │     AKS     │  │   + Kibana Stack    │ │
+│  │  (Primary)  │  │ (Secondary) │  │   (Multi-Cloud)     │ │
 │  └─────────────┘  └─────────────┘  └─────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -57,8 +59,8 @@ This project provides a complete, production-ready Elasticsearch monitoring stac
 
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.5.0
 - [AWS CLI](https://aws.amazon.com/cli/) configured
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) configured
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) >= 1.28
-- [Helm](https://helm.sh/docs/intro/install/) >= 3.12.0
 - [GitHub Account](https://github.com/) with repository access
 
 ### **1. Clone Repository**
@@ -68,11 +70,18 @@ git clone https://github.com/InfraPlatformer/elastic-terraform-demo.git
 cd elastic-terraform-demo
 ```
 
-### **2. Configure AWS Credentials**
+### **2. Configure Cloud Credentials**
 
+#### **AWS Configuration**
 ```bash
 aws configure
 # Enter your AWS Access Key ID, Secret Access Key, and Region
+```
+
+#### **Azure Configuration**
+```bash
+az login
+az account set --subscription "your-subscription-id"
 ```
 
 ### **3. Deploy Development Environment**
@@ -84,40 +93,33 @@ cd environments/development
 # Initialize Terraform
 terraform init
 
-# Plan deployment
+# Plan deployment (multi-cloud)
 terraform plan
 
 # Apply infrastructure
 terraform apply -auto-approve
 ```
 
-### **4. Deploy Elasticsearch Stack**
+### **4. Access Your Multi-Cloud Stack**
 
 ```bash
-# Add Elastic Helm repository
-helm repo add elastic https://helm.elastic.co
-helm repo update
+# Configure kubectl for AWS EKS
+aws eks update-kubeconfig --region us-west-2 --name advanced-elastic-development-aws
 
-# Deploy Elasticsearch
-helm upgrade --install elasticsearch elastic/elasticsearch \
-  --namespace elasticsearch \
-  --create-namespace \
-  -f ../../elasticsearch-values.yaml
+# Configure kubectl for Azure AKS
+az aks get-credentials --resource-group multi-cloud-elastic-rg --name advanced-elastic-development-aws-azure
 
-# Deploy Kibana
-helm upgrade --install kibana elastic/kibana \
-  --namespace elasticsearch \
-  -f ../../kibana-values.yaml
-```
+# Check Elasticsearch on AWS
+kubectl get pods -n elasticsearch --context=aws
 
-### **5. Access Your Stack**
+# Check Elasticsearch on Azure
+kubectl get pods -n elasticsearch --context=azure
 
-```bash
-# Port forward Kibana
-kubectl port-forward -n elasticsearch svc/kibana-kibana 5601:5601
+# Port forward Kibana (AWS)
+kubectl port-forward -n elasticsearch svc/advanced-elastic-development-aws-elasticsearch-aws 9200:9200 --context=aws
 
-# Access Kibana at: http://localhost:5601
-# Default credentials: elastic / (check kubectl get secrets)
+# Port forward Kibana (Azure)
+kubectl port-forward -n elasticsearch svc/advanced-elastic-development-aws-elasticsearch-azure 9200:9200 --context=azure
 ```
 
 ## 🔧 **CI/CD Pipeline Setup**
@@ -126,6 +128,7 @@ kubectl port-forward -n elasticsearch svc/kibana-kibana 5601:5601
 
 Follow the [Secrets Setup Guide](.github/SETUP_SECRETS.md) to configure:
 - AWS credentials for each environment
+- Azure credentials for each environment
 - Environment protection rules
 - Deployment permissions
 
@@ -141,27 +144,31 @@ git push origin develop  # Triggers development deployment
 
 - View runs in GitHub Actions tab
 - Check deployment status in AWS Console
+- Check deployment status in Azure Portal
 - Monitor Kubernetes resources with kubectl
 
 ## 🌍 **Environment Configurations**
 
 ### **Development Environment**
 - **Purpose**: Local development and testing
-- **Resources**: Minimal (t3.medium instances)
+- **Resources**: Multi-cloud (AWS EKS + Azure AKS)
 - **Auto-deploy**: ✅ On `develop` branch
 - **Security**: Basic (disabled for development)
+- **Cloud Providers**: AWS (us-west-2) + Azure (West US 2)
 
 ### **Staging Environment**
 - **Purpose**: Pre-production testing
 - **Resources**: Medium (t3.large instances)
 - **Auto-deploy**: ✅ On `main` branch
 - **Security**: Production-like with SSL
+- **Cloud Providers**: AWS (us-west-2)
 
 ### **Production Environment**
 - **Purpose**: Live production workloads
 - **Resources**: High (m5.large/xlarge instances)
 - **Auto-deploy**: ❌ Manual approval required
 - **Security**: Enterprise-grade with full encryption
+- **Cloud Providers**: AWS (us-west-2)
 
 ## 📁 **Project Structure**
 
@@ -173,17 +180,22 @@ elastic-terraform/
 │   └── SETUP_SECRETS.md             # Secrets configuration guide
 ├── environments/                     # Environment-specific configs
 │   ├── development/
-│   │   └── terraform.tfvars         # Dev environment variables
+│   │   ├── main.tf                  # Development environment main config
+│   │   ├── variables.tf             # Development environment variables
+│   │   ├── outputs.tf               # Development environment outputs
+│   │   └── terraform.tfvars         # Development environment variables
 │   ├── staging/
 │   │   └── terraform.tfvars         # Staging environment variables
 │   └── production/
 │       └── terraform.tfvars         # Production environment variables
 ├── modules/                          # Reusable Terraform modules
 │   ├── eks/                         # EKS cluster module
+│   ├── azure-aks/                   # Azure AKS cluster module
 │   ├── elasticsearch/               # Elasticsearch module
 │   ├── kibana/                      # Kibana module
 │   ├── monitoring/                  # Monitoring stack module
-│   └── networking/                  # VPC and networking module
+│   ├── networking/                  # VPC and networking module
+│   └── multi-cloud-elasticsearch/   # Multi-cloud Elasticsearch module
 ├── elasticsearch-values.yaml         # Elasticsearch Helm values
 ├── kibana-values.yaml               # Kibana Helm values
 ├── main.tf                          # Main Terraform configuration
@@ -199,16 +211,18 @@ elastic-terraform/
 - **RBAC**: Role-based access control
 - **Network Policies**: Kubernetes network security
 - **IAM Integration**: AWS IAM roles and policies
-- **Secret Management**: Kubernetes secrets and AWS Secrets Manager
+- **Azure RBAC**: Azure role-based access control
+- **Secret Management**: Kubernetes secrets and cloud provider secret management
 
 ## 📊 **Monitoring & Observability**
 
-- **Elasticsearch**: Centralized logging and search
+- **Elasticsearch**: Centralized logging and search across clouds
 - **Kibana**: Data visualization and management
 - **Prometheus**: Metrics collection
 - **Grafana**: Advanced dashboards
 - **Alerting**: Automated notifications
 - **Log Aggregation**: Centralized log management
+- **Multi-Cloud Visibility**: Cross-cloud monitoring and alerting
 
 ## 💰 **Cost Optimization**
 
@@ -216,19 +230,24 @@ elastic-terraform/
 - **Spot Instances**: Use of AWS spot instances for non-critical workloads
 - **Resource Limits**: Proper CPU and memory limits
 - **Storage Optimization**: Efficient EBS volume management
+- **Multi-Cloud Cost Management**: Cost tracking across cloud providers
 - **Monitoring**: Cost tracking and optimization recommendations
 
 ## 🚨 **Troubleshooting**
 
 ### **Common Issues**
 
-1. **Kibana Connection Issues**
+1. **Multi-Cloud Connection Issues**
    ```bash
-   # Check Elasticsearch status
-   kubectl get pods -n elasticsearch
+   # Check AWS Elasticsearch status
+   kubectl get pods -n elasticsearch --context=aws
    
-   # Check Elasticsearch logs
-   kubectl logs -n elasticsearch elasticsearch-master-0
+   # Check Azure Elasticsearch status
+   kubectl get pods -n elasticsearch --context=azure
+   
+   # Check cross-cloud connectivity
+   kubectl logs -n elasticsearch elasticsearch-aws-0 --context=aws
+   kubectl logs -n elasticsearch elasticsearch-azure-0 --context=azure
    ```
 
 2. **Terraform State Issues**
@@ -238,12 +257,14 @@ elastic-terraform/
    
    # Import existing resources
    terraform import aws_eks_cluster.main cluster-name
+   terraform import azurerm_kubernetes_cluster.main cluster-name
    ```
 
 3. **CI/CD Pipeline Failures**
    - Check GitHub Actions logs
-   - Verify AWS credentials
+   - Verify AWS and Azure credentials
    - Check environment protection rules
+   - Verify multi-cloud configuration
 
 ### **Getting Help**
 
@@ -268,6 +289,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [HashiCorp Terraform](https://www.terraform.io/) for infrastructure automation
 - [Elastic](https://www.elastic.co/) for the Elasticsearch stack
 - [AWS](https://aws.amazon.com/) for cloud infrastructure
+- [Microsoft Azure](https://azure.microsoft.com/) for cloud infrastructure
 - [Kubernetes](https://kubernetes.io/) for container orchestration
 
 ---
