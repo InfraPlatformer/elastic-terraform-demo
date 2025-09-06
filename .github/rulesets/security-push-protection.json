@@ -1,0 +1,59 @@
+{
+  "name": "Security Push Protection",
+  "target": "push",
+  "enforcement": "active",
+  "rules": [
+    {
+      "type": "file_path_restriction",
+      "parameters": {
+        "file_paths": [
+          "**/*.key",
+          "**/*.pem",
+          "**/*.p12",
+          "**/*.pfx",
+          "**/*.p8",
+          "**/*.crt",
+          "**/*.cer",
+          "**/*.der",
+          "**/.env*",
+          "**/secrets/**",
+          "**/private/**",
+          "**/credentials/**",
+          "**/config/secrets*",
+          "**/terraform.tfvars",
+          "**/terraform.tfstate*"
+        ]
+      }
+    },
+    {
+      "type": "file_path_length_restriction",
+      "parameters": {
+        "max_file_path_length": 260
+      }
+    },
+    {
+      "type": "file_extension_restriction",
+      "parameters": {
+        "file_extensions": [
+          ".key",
+          ".pem",
+          ".p12",
+          ".pfx",
+          ".p8"
+        ]
+      }
+    },
+    {
+      "type": "file_size_restriction",
+      "parameters": {
+        "max_file_size": 104857600
+      }
+    }
+  ],
+  "bypass_actors": [
+    {
+      "actor_id": 1,
+      "actor_type": "OrganizationAdmin"
+    }
+  ]
+}
