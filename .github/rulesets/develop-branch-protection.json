@@ -1,0 +1,45 @@
+{
+  "name": "Development Branch Protection",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "include": ["develop"]
+    }
+  },
+  "rules": [
+    {
+      "type": "required_reviews",
+      "parameters": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews_on_push": true,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "required_status_checks": [
+          {
+            "context": "Code Quality & Security",
+            "integration_id": null
+          }
+        ],
+        "strict_required_status_checks_policy": false
+      }
+    },
+    {
+      "type": "required_linear_history"
+    },
+    {
+      "type": "update"
+    }
+  ],
+  "bypass_actors": [
+    {
+      "actor_id": 1,
+      "actor_type": "OrganizationAdmin"
+    }
+  ]
+}
