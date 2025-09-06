@@ -1,211 +1,275 @@
-# GitHub Secrets Setup for Multi-Cloud CI/CD Pipeline
+# 🔐 **GitHub Secrets Setup Guide**
 
-## 🔐 **Required GitHub Secrets**
+This guide explains how to configure all required secrets for the Elastic Terraform CI/CD pipeline across multiple environments.
 
-This document outlines all the GitHub secrets required for the multi-cloud Terraform CI/CD pipeline to function properly.
+---
 
-## 🚨 **Critical Secrets (Required)**
+## 📋 **Required Secrets Overview**
 
-### **AWS Credentials - Development Environment**
-```
-AWS_ACCESS_KEY_ID_DEV
-AWS_SECRET_ACCESS_KEY_DEV
-```
+The project requires different sets of secrets for each environment to ensure proper isolation and security.
 
-### **AWS Credentials - Staging Environment**
-```
-AWS_ACCESS_KEY_ID_STAGING
-AWS_SECRET_ACCESS_KEY_STAGING
-```
+---
 
-### **AWS Credentials - Production Environment**
-```
-AWS_ACCESS_KEY_ID_PROD
-AWS_SECRET_ACCESS_KEY_PROD
-```
+## 🌍 **Environment-Specific Secrets**
 
-### **Azure Credentials (All Environments)**
-```
-AZURE_CREDENTIALS
-```
+### **Development Environment**
+- **Environment Name**: `development`
+- **Branch**: `develop`
+- **Required Secrets**:
 
-## 📋 **How to Set Up Secrets**
+| Secret Name | Description | Example |
+|-------------|-------------|---------|
+| `AWS_ACCESS_KEY_ID_DEV` | AWS Access Key for Development | `AKIAIOSFODNN7EXAMPLE` |
+| `AWS_SECRET_ACCESS_KEY_DEV` | AWS Secret Key for Development | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
+| `AZURE_CREDENTIALS` | Azure Service Principal (if using Azure) | `{"clientId":"...","clientSecret":"...","subscriptionId":"...","tenantId":"..."}` |
 
-### **Step 1: Go to GitHub Repository Settings**
-1. Navigate to your repository: `https://github.com/InfraPlatformer/elastic-terraform-demo`
-2. Click on **Settings** tab
-3. Click on **Secrets and variables** → **Actions**
+### **Staging Environment**
+- **Environment Name**: `staging`
+- **Branch**: `develop`
+- **Required Secrets**:
 
-### **Step 2: Add AWS Secrets**
+| Secret Name | Description | Example |
+|-------------|-------------|---------|
+| `AWS_ACCESS_KEY_ID_STAGING` | AWS Access Key for Staging | `AKIAIOSFODNN7EXAMPLE` |
+| `AWS_SECRET_ACCESS_KEY_STAGING` | AWS Secret Key for Staging | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
+| `AZURE_CREDENTIALS` | Azure Service Principal (if using Azure) | `{"clientId":"...","clientSecret":"...","subscriptionId":"...","tenantId":"..."}` |
+
+### **Production Environment**
+- **Environment Name**: `production`
+- **Branch**: `main`
+- **Required Secrets**:
+
+| Secret Name | Description | Example |
+|-------------|-------------|---------|
+| `AWS_ACCESS_KEY_ID_PROD` | AWS Access Key for Production | `AKIAIOSFODNN7EXAMPLE` |
+| `AWS_SECRET_ACCESS_KEY_PROD` | AWS Secret Key for Production | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
+| `AZURE_CREDENTIALS` | Azure Service Principal (if using Azure) | `{"clientId":"...","clientSecret":"...","subscriptionId":"...","tenantId":"..."}` |
+
+---
+
+## 🛠️ **Setup Instructions**
+
+### **Step 1: Create GitHub Environments**
+
+1. Go to your GitHub repository: `https://github.com/InfraPlatformer/elastic-terraform-demo`
+2. Navigate to **Settings** → **Environments**
+3. Click **New environment** for each environment:
+   - `development`
+   - `staging`
+   - `production`
+
+### **Step 2: Configure Environment Protection Rules**
 
 #### **Development Environment**
-```
-Name: AWS_ACCESS_KEY_ID_DEV
-Value: [Your AWS Access Key ID for dev environment]
-
-Name: AWS_SECRET_ACCESS_KEY_DEV
-Value: [Your AWS Secret Access Key for dev environment]
-```
+- **Deployment branches**: `develop`
+- **Required reviewers**: Optional (recommended for team collaboration)
+- **Wait timer**: 0 minutes
+- **Environment secrets**: Add development-specific secrets
 
 #### **Staging Environment**
-```
-Name: AWS_ACCESS_KEY_ID_STAGING
-Value: [Your AWS Access Key ID for staging environment]
-
-Name: AWS_SECRET_ACCESS_KEY_STAGING
-Value: [Your AWS Secret Access Key for staging environment]
-```
+- **Deployment branches**: `develop`
+- **Required reviewers**: Required (at least 1)
+- **Wait timer**: 5 minutes (recommended)
+- **Environment secrets**: Add staging-specific secrets
 
 #### **Production Environment**
-```
-Name: AWS_ACCESS_KEY_ID_PROD
-Value: [Your AWS Access Key ID for production environment]
+- **Deployment branches**: `main`
+- **Required reviewers**: Required (at least 2)
+- **Wait timer**: 10 minutes (recommended)
+- **Environment secrets**: Add production-specific secrets
 
-Name: AWS_SECRET_ACCESS_KEY_PROD
-Value: [Your AWS Secret Access Key for production environment]
-```
+### **Step 3: Add Environment Secrets**
 
-### **Step 3: Add Azure Secret**
+For each environment, add the corresponding secrets:
 
-#### **Azure Service Principal Credentials**
-```
-Name: AZURE_CREDENTIALS
-Value: [JSON string with Azure service principal details]
-```
+1. Go to **Settings** → **Environments**
+2. Click on the environment name (e.g., `development`)
+3. Click **Add secret** for each required secret
+4. Enter the secret name and value
+5. Click **Add secret**
 
-**Azure Credentials JSON Format:**
+---
+
+## 🔑 **AWS IAM Setup**
+
+### **Required IAM Permissions**
+
+Each environment needs an IAM user with the following policies:
+
 ```json
 {
-  "clientId": "your-client-id",
-  "clientSecret": "your-client-secret",
-  "subscriptionId": "your-subscription-id",
-  "tenantId": "your-tenant-id"
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:*",
+                "eks:*",
+                "iam:*",
+                "s3:*",
+                "kms:*",
+                "cloudwatch:*",
+                "logs:*",
+                "route53:*",
+                "acm:*",
+                "elasticloadbalancing:*",
+                "autoscaling:*"
+            ],
+            "Resource": "*"
+        }
+    ]
 }
 ```
 
-## 🔑 **How to Create Azure Service Principal**
+### **Creating IAM Users**
 
-### **Step 1: Install Azure CLI**
-```bash
-# Windows (PowerShell)
-winget install Microsoft.AzureCLI
+1. **Development User**:
+   ```bash
+   aws iam create-user --user-name elastic-dev-user
+   aws iam attach-user-policy --user-name elastic-dev-user --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+   aws iam create-access-key --user-name elastic-dev-user
+   ```
 
-# macOS
-brew install azure-cli
+2. **Staging User**:
+   ```bash
+   aws iam create-user --user-name elastic-staging-user
+   aws iam attach-user-policy --user-name elastic-staging-user --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+   aws iam create-access-key --user-name elastic-staging-user
+   ```
 
-# Linux
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-```
+3. **Production User**:
+   ```bash
+   aws iam create-user --user-name elastic-prod-user
+   aws iam attach-user-policy --user-name elastic-prod-user --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+   aws iam create-access-key --user-name elastic-prod-user
+   ```
 
-### **Step 2: Login to Azure**
-```bash
-az login
-```
+---
 
-### **Step 3: Create Service Principal**
-```bash
-az ad sp create-for-rbac \
-  --name "elastic-terraform-sp" \
-  --role contributor \
-  --scopes /subscriptions/[YOUR-SUBSCRIPTION-ID] \
-  --sdk-auth
-```
+## 🔒 **Security Best Practices**
 
-### **Step 4: Copy Output**
-The command will output a JSON object. Copy the entire JSON and use it as the `AZURE_CREDENTIALS` secret value.
+### **1. IAM Security**
+- Use IAM roles with minimal permissions for each environment
+- Enable MFA for all AWS accounts
+- Rotate access keys regularly (every 90 days)
+- Use environment-specific AWS accounts when possible
 
-## 🔐 **How to Create AWS IAM Users**
+### **2. Secret Management**
+- Never commit secrets to the repository
+- Use GitHub's encrypted secrets storage
+- Rotate secrets regularly
+- Monitor secret access logs
 
-### **Step 1: Create IAM Users for Each Environment**
-1. Go to AWS IAM Console
-2. Create users: `elastic-terraform-dev`, `elastic-terraform-staging`, `elastic-terraform-prod`
+### **3. Environment Isolation**
+- Use separate AWS accounts for production
+- Implement network isolation between environments
+- Use different S3 buckets for each environment
+- Implement proper tagging for cost tracking
 
-### **Step 2: Attach Policies**
-Attach the following policies to each user:
-- `AmazonEKSClusterPolicy`
-- `AmazonEKSWorkerNodePolicy`
-- `AmazonEKS_CNI_Policy`
-- `AmazonEC2ContainerRegistryReadOnly`
-- `AmazonS3FullAccess` (for state management)
+---
 
-### **Step 3: Generate Access Keys**
-1. Select each user
-2. Go to **Security credentials** tab
-3. Click **Create access key**
-4. Copy the Access Key ID and Secret Access Key
+## 📊 **Cost Management**
 
-## 🚨 **Security Best Practices**
+### **Environment-Specific Recommendations**
 
-### **1. Principle of Least Privilege**
-- Only grant necessary permissions
-- Use separate credentials for each environment
-- Regularly rotate access keys
+| Environment | Instance Types | Storage | Monitoring |
+|-------------|----------------|---------|------------|
+| **Development** | `t3.medium`, `m5.large` | 50GB | Basic |
+| **Staging** | `m5.large`, `m5.xlarge` | 100GB | Standard |
+| **Production** | `m5.xlarge`, `m5.2xlarge` | 200GB+ | Enhanced |
 
-### **2. Environment Isolation**
-- Never share credentials between environments
-- Use different AWS accounts for production if possible
-- Implement proper network segmentation
+### **Cost Optimization**
+- Use spot instances for development
+- Implement auto-scaling for staging
+- Use reserved instances for production
+- Set up automated cleanup for development resources
 
-### **3. Secret Management**
-- Never commit secrets to code
-- Use GitHub's encrypted secrets
-- Consider using AWS Secrets Manager or Azure Key Vault for production
+---
 
-## ✅ **Verification Steps**
-
-### **Step 1: Test Development Deployment**
-1. Push to `develop` branch
-2. Check GitHub Actions tab
-3. Verify all secrets are accessible
-4. Confirm deployment succeeds
-
-### **Step 2: Test Staging Deployment**
-1. Push to `develop` branch
-2. Verify staging environment deployment
-3. Check multi-cloud connectivity
-
-### **Step 3: Test Production Deployment**
-1. Push to `main` branch
-2. Verify manual approval workflow
-3. Confirm production deployment
-
-## 🆘 **Troubleshooting**
+## 🚨 **Troubleshooting**
 
 ### **Common Issues**
 
-#### **"Secret not found" Error**
-- Verify secret names match exactly (case-sensitive)
-- Check if secrets are set in the correct repository
-- Ensure secrets are not set at organization level
+1. **"Environment not found"**:
+   - Ensure environment names match exactly in workflows
+   - Check environment protection rules
 
-#### **"Invalid credentials" Error**
-- Verify AWS/Azure credentials are correct
-- Check if credentials have expired
-- Confirm IAM permissions are sufficient
+2. **"Secrets not accessible"**:
+   - Verify secrets are added to the correct environment
+   - Check secret names match workflow requirements
 
-#### **"Permission denied" Error**
-- Verify service principal has correct roles
-- Check if subscription is active
-- Confirm resource group permissions
+3. **"Approval not working"**:
+   - Verify environment protection rules are configured
+   - Check required reviewers are assigned
 
-## 📞 **Support**
+4. **"AWS credentials invalid"**:
+   - Verify IAM user has correct permissions
+   - Check access key is not expired
+   - Ensure secret key is correct
 
-If you encounter issues:
-1. Check GitHub Actions logs for detailed error messages
-2. Verify all secrets are properly configured
-3. Test credentials manually using AWS CLI/Azure CLI
-4. Review IAM policies and Azure RBAC assignments
+### **Verification Steps**
 
-## 🔄 **Regular Maintenance**
+1. **Test Development**:
+   ```bash
+   git checkout develop
+   git commit --allow-empty -m "Test development deployment"
+   git push origin develop
+   ```
 
-### **Monthly Tasks**
-- Review and rotate AWS access keys
-- Verify Azure service principal permissions
-- Audit IAM policies and Azure RBAC
-- Update documentation
+2. **Test Staging**:
+   ```bash
+   git checkout develop
+   git commit --allow-empty -m "Test staging deployment"
+   git push origin develop
+   ```
 
-### **Quarterly Tasks**
-- Review security policies
-- Update CI/CD pipeline configurations
-- Conduct security assessments
-- Update dependencies and tools
+3. **Test Production**:
+   ```bash
+   git checkout main
+   git commit --allow-empty -m "Test production deployment"
+   git push origin main
+   ```
+
+---
+
+## 📈 **Monitoring and Alerting**
+
+### **Set Up Alerts**
+1. **CloudWatch Alarms** for each environment
+2. **Slack/Teams notifications** for deployment status
+3. **Cost alerts** for unexpected usage
+4. **Security alerts** for unauthorized access
+
+### **Monitoring Dashboard**
+- Resource usage per environment
+- Deployment success/failure rates
+- Cost tracking per environment
+- Security compliance status
+
+---
+
+## ✅ **Verification Checklist**
+
+- [ ] All three environments created (`development`, `staging`, `production`)
+- [ ] Environment protection rules configured
+- [ ] Required secrets added to each environment
+- [ ] IAM users created with proper permissions
+- [ ] Branch protection rules enabled
+- [ ] Test deployments successful
+- [ ] Monitoring and alerting configured
+- [ ] Documentation updated
+
+---
+
+## 🔗 **Useful Links**
+
+- **Repository**: `https://github.com/InfraPlatformer/elastic-terraform-demo`
+- **Environments**: `https://github.com/InfraPlatformer/elastic-terraform-demo/settings/environments`
+- **Secrets**: `https://github.com/InfraPlatformer/elastic-terraform-demo/settings/secrets/actions`
+- **Actions**: `https://github.com/InfraPlatformer/elastic-terraform-demo/actions`
+
+---
+
+**🎉 Once all secrets are configured, your CI/CD pipeline will be ready for production use!**
+
+**Happy deploying! 🚀**
