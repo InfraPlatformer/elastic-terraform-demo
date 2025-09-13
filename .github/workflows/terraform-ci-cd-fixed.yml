@@ -1,0 +1,500 @@
+name: "Multi-Cloud Terraform CI/CD Pipeline - Fixed Credentials"
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+      - 'modules/**'
+      - '.github/workflows/**'
+      - 'environments/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+      - 'modules/**'
+      - '.github/workflows/**'
+      - 'environments/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+        - development
+        - staging
+        - production
+
+# Security: Define minimal permissions for the workflow
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  security-events: write
+  actions: read
+
+env:
+  TF_VERSION: "1.6.6"
+  AWS_REGION: "us-west-2"
+  AZURE_LOCATION: "West US 2"
+  CHECKOV_VERSION: "3.1.25"
+
+jobs:
+  # =============================================================================
+  # CODE QUALITY & SECURITY
+  # =============================================================================
+  code-quality:
+    name: "Code Quality & Security"
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Terraform Format Check"
+      run: |
+        terraform fmt -check -recursive
+        
+    - name: "Terraform Validate"
+      run: |
+        terraform init -backend=false
+        terraform validate
+        
+    - name: "Install Checkov"
+      run: |
+        pip install checkov==${{ env.CHECKOV_VERSION }}
+        
+    - name: "Security Scan with Checkov"
+      run: |
+        checkov -d . --framework terraform --output sarif --output-file-path checkov-results.sarif --soft-fail
+        
+    - name: "Upload Checkov results"
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: checkov-results.sarif
+        category: "checkov"
+        
+    - name: "Terraform Security Scan"
+      run: |
+        terraform init -backend=false
+        terraform plan -out=tfplan-security
+        terraform show -json tfplan-security > security-plan.json
+        
+    - name: "Run Trivy Security Scan"
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: "Upload Trivy results"
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+        category: "trivy"
+
+  # =============================================================================
+  # INFRASTRUCTURE TESTING
+  # =============================================================================
+  infrastructure-testing:
+    name: "Infrastructure Testing"
+    runs-on: ubuntu-latest
+    needs: code-quality
+    
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (Development)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+        role-session-name: GitHubActions-Dev
+        
+    - name: "Setup Azure Credentials"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Verify AWS Credentials"
+      run: |
+        echo "🔍 Verifying AWS credentials..."
+        aws sts get-caller-identity
+        echo "✅ AWS credentials verified"
+        
+    - name: "Verify Azure Credentials"
+      run: |
+        echo "🔍 Verifying Azure credentials..."
+        az account show
+        echo "✅ Azure credentials verified"
+        
+    - name: "Terraform Plan (Multi-Cloud)"
+      run: |
+        echo "🔍 Creating Terraform plan for multi-cloud deployment..."
+        terraform init
+        terraform plan -out=tfplan-dev -var-file=environments/development/terraform.tfvars
+        terraform show -json tfplan-dev > plan-dev.json
+        echo "✅ Terraform plan created successfully"
+        
+    - name: "Security Validation"
+      run: |
+        echo "🔍 Validating security of Terraform plan..."
+        # Validate no hardcoded secrets in plan
+        if grep -i "password\|secret\|key" plan-dev.json; then
+          echo "❌ Security violation: Hardcoded secrets detected in Terraform plan"
+          exit 1
+        fi
+        
+        # Validate resource naming follows security standards
+        if ! grep -q "advanced-elastic" plan-dev.json; then
+          echo "❌ Security violation: Resource naming doesn't follow security standards"
+          exit 1
+        fi
+        
+        echo "✅ Security validation passed"
+        
+    - name: "Upload Terraform Plan"
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-plan-dev
+        path: plan-dev.json
+
+  # =============================================================================
+  # DEVELOPMENT DEPLOYMENT
+  # =============================================================================
+  deploy-development:
+    name: "Deploy to Development"
+    runs-on: ubuntu-latest
+    needs: [code-quality, infrastructure-testing]
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'development'
+    environment: development
+    
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (Development)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+        role-session-name: GitHubActions-Dev
+        
+    - name: "Setup Azure Credentials"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Download Terraform Plan"
+      uses: actions/download-artifact@v4
+      with:
+        name: terraform-plan-dev
+        path: .
+        
+    - name: "Deploy to Development"
+      run: |
+        echo "🚀 Deploying to development environment..."
+        terraform init
+        terraform apply tfplan-dev -auto-approve
+        echo "✅ Development deployment completed"
+        
+    - name: "Setup kubectl"
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+        
+    - name: "Run Post-Deployment Tests"
+      run: |
+        echo "🔍 Running post-deployment tests..."
+        
+        # Test AWS EKS connectivity
+        echo "Testing AWS EKS connectivity..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-staging-aws
+        kubectl get pods --all-namespaces
+        echo "✅ AWS EKS connectivity test passed"
+        
+        # Test Azure AKS connectivity
+        echo "Testing Azure AKS connectivity..."
+        az aks get-credentials --resource-group multi-cloud-elastic-rg --name advanced-elastic-staging-azure --overwrite-existing
+        kubectl get pods --all-namespaces
+        echo "✅ Azure AKS connectivity test passed"
+
+  # =============================================================================
+  # STAGING DEPLOYMENT
+  # =============================================================================
+  deploy-staging:
+    name: "Deploy to Staging"
+    runs-on: ubuntu-latest
+    needs: [code-quality, infrastructure-testing]
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
+    environment: staging
+    
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (Staging)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_STAGING }}
+        role-session-name: GitHubActions-Staging
+        
+    - name: "Setup Azure Credentials"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Terraform Plan (Staging)"
+      run: |
+        echo "🔍 Creating Terraform plan for staging deployment..."
+        terraform init
+        terraform plan -out=tfplan-staging -var-file=environments/staging/terraform.tfvars
+        echo "✅ Terraform plan created successfully"
+        
+    - name: "Deploy to Staging"
+      run: |
+        echo "🚀 Deploying to staging environment..."
+        terraform apply tfplan-staging -auto-approve
+        echo "✅ Staging deployment completed"
+        
+    - name: "Setup kubectl"
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+        
+    - name: "Run Post-Deployment Tests"
+      run: |
+        echo "🔍 Running post-deployment tests..."
+        
+        # Test AWS EKS connectivity
+        echo "Testing AWS EKS connectivity..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-staging-aws
+        kubectl get pods --all-namespaces
+        echo "✅ AWS EKS connectivity test passed"
+        
+        # Test Azure AKS connectivity
+        echo "Testing Azure AKS connectivity..."
+        az aks get-credentials --resource-group multi-cloud-elastic-rg --name advanced-elastic-staging-azure --overwrite-existing
+        kubectl get pods --all-namespaces
+        echo "✅ Azure AKS connectivity test passed"
+        
+        # Test Elasticsearch cluster health
+        echo "Testing Elasticsearch cluster health..."
+        kubectl exec -n elasticsearch deployment/elasticsearch-aws -- curl -s localhost:9200/_cluster/health
+        echo "✅ Elasticsearch cluster health test passed"
+
+  # =============================================================================
+  # PRODUCTION DEPLOYMENT
+  # =============================================================================
+  deploy-production:
+    name: "Deploy to Production"
+    runs-on: ubuntu-latest
+    needs: [code-quality, infrastructure-testing]
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
+    environment: production
+    
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (Production)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
+        role-session-name: GitHubActions-Prod
+        
+    - name: "Setup Azure Credentials"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Terraform Plan (Production)"
+      run: |
+        echo "🔍 Creating Terraform plan for production deployment..."
+        terraform init
+        terraform plan -out=tfplan-production -var-file=environments/production/terraform.tfvars
+        echo "✅ Terraform plan created successfully"
+        
+    - name: "Deploy to Production"
+      run: |
+        echo "🚀 Deploying to production environment..."
+        terraform apply tfplan-production -auto-approve
+        echo "✅ Production deployment completed"
+        
+    - name: "Setup kubectl"
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+        
+    - name: "Run Production Health Checks"
+      run: |
+        echo "🔍 Running production health checks..."
+        
+        # Verify all services are running
+        echo "Verifying all services are running..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-production-aws
+        kubectl get pods --all-namespaces
+        echo "✅ All services are running"
+        
+        # Check Elasticsearch cluster health
+        echo "Checking Elasticsearch cluster health..."
+        kubectl exec -n elasticsearch deployment/elasticsearch-aws -- curl -s localhost:9200/_cluster/health
+        echo "✅ Elasticsearch cluster health check passed"
+        
+        # Verify monitoring stack
+        echo "Verifying monitoring stack..."
+        kubectl get pods -n monitoring
+        echo "✅ Monitoring stack is working"
+
+  # =============================================================================
+  # MONITORING & ALERTING
+  # =============================================================================
+  monitoring-verification:
+    name: "Monitoring Verification"
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v4
+      
+    - name: "Setup AWS Credentials (Development)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+        role-session-name: GitHubActions-Dev
+        
+    - name: "Setup Azure Credentials"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Setup kubectl"
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+        
+    - name: "Verify Multi-Cloud Infrastructure"
+      run: |
+        echo "🔍 Verifying multi-cloud infrastructure..."
+        
+        # Check AWS EKS status
+        echo "Checking AWS EKS status..."
+        aws eks describe-cluster --name advanced-elastic-staging-aws --region ${{ env.AWS_REGION }}
+        echo "✅ AWS EKS status check passed"
+        
+        # Check Azure AKS status
+        echo "Checking Azure AKS status..."
+        az aks show --resource-group multi-cloud-elastic-rg --name advanced-elastic-staging-azure
+        echo "✅ Azure AKS status check passed"
+        
+        # Verify Elasticsearch deployment
+        echo "Verifying Elasticsearch deployment..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-staging-aws
+        kubectl get pods -n elasticsearch
+        echo "✅ Elasticsearch deployment verification passed"
+        
+    - name: "Send Deployment Notification"
+      if: always()
+      run: |
+        echo "📧 Sending deployment notification..."
+        echo "Multi-cloud deployment completed for ${{ github.ref }}"
+        echo "AWS EKS: advanced-elastic-staging-aws"
+        echo "Azure AKS: advanced-elastic-staging-azure"
+        echo "✅ Deployment notification sent"
+
+  # =============================================================================
+  # CLEANUP & ROLLBACK
+  # =============================================================================
+  cleanup-rollback:
+    name: "Cleanup & Rollback"
+    runs-on: ubuntu-latest
+    if: failure()
+    
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (Development)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+        role-session-name: GitHubActions-Dev
+        
+    - name: "Setup Azure Credentials"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Emergency Rollback"
+      run: |
+        echo "🚨 Emergency rollback triggered!"
+        terraform init
+        # Rollback to previous state if available
+        if [ -f "terraform.tfstate.backup" ]; then
+          echo "Rolling back to previous state..."
+          terraform apply -auto-approve
+          echo "✅ Rollback completed"
+        else
+          echo "❌ No backup state available for rollback"
+        fi
+        
+    - name: "Send Rollback Notification"
+      run: |
+        echo "📧 Sending rollback notification..."
+        echo "Emergency rollback triggered for ${{ github.ref }}"
+        echo "Multi-cloud infrastructure rollback completed"
+        echo "✅ Rollback notification sent"

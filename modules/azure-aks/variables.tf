@@ -1,174 +1,100 @@
-# =============================================================================
-# AZURE AKS MODULE VARIABLES
-# =============================================================================
+# Azure AKS Module Variables
+
+variable "resource_group_name" {
+  description = "Name of the Azure Resource Group"
+  type        = string
+}
 
 variable "cluster_name" {
   description = "Name of the AKS cluster"
   type        = string
+  default     = "elastic-aks"
 }
 
-variable "cluster_version" {
+variable "kubernetes_version" {
   description = "Kubernetes version for the AKS cluster"
   type        = string
-  default     = "1.29.0"
+  default     = "1.29"
 }
 
-variable "resource_group_name" {
-  description = "Name of the Azure resource group"
+variable "node_vm_size" {
+  description = "VM size for the AKS nodes"
+  type        = string
+  default     = "Standard_D4s_v3"
+}
+
+variable "node_count" {
+  description = "Number of nodes in the default node pool"
+  type        = number
+  default     = 3
+}
+
+variable "min_count" {
+  description = "Minimum number of nodes for auto-scaling"
+  type        = number
+  default     = 2
+}
+
+variable "max_count" {
+  description = "Maximum number of nodes for auto-scaling"
+  type        = number
+  default     = 5
+}
+
+variable "os_disk_size_gb" {
+  description = "OS disk size in GB for the nodes"
+  type        = number
+  default     = 100
+}
+
+variable "subnet_id" {
+  description = "ID of the subnet for the AKS nodes"
   type        = string
 }
 
-variable "location" {
-  description = "Azure region for the AKS cluster"
+variable "gateway_subnet_id" {
+  description = "ID of the subnet for the Application Gateway"
   type        = string
-  default     = "West US 2"
 }
 
-variable "environment" {
-  description = "Environment name (e.g., staging, production)"
+variable "service_cidr" {
+  description = "CIDR for Kubernetes services"
   type        = string
+  default     = "10.1.0.0/16"
+}
+
+variable "dns_service_ip" {
+  description = "IP address for the DNS service"
+  type        = string
+  default     = "10.1.0.10"
+}
+
+variable "node_taints" {
+  description = "Taints for the nodes"
+  type        = list(string)
+  default     = []
+}
+
+variable "node_labels" {
+  description = "Labels for the nodes"
+  type        = map(string)
+  default = {
+    "role" = "elasticsearch"
+  }
+}
+
+variable "admin_group_object_ids" {
+  description = "Object IDs of Azure AD groups with admin access"
+  type        = list(string)
+  default     = []
 }
 
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
-  default     = {}
-}
-
-# Networking Configuration
-variable "vnet_address_space" {
-  description = "Address space for the virtual network"
-  type        = list(string)
-  default     = ["10.0.0.0/16"]
-}
-
-variable "subnet_address_prefixes" {
-  description = "Address prefixes for the subnet"
-  type        = list(string)
-  default     = ["10.0.1.0/24"]
-}
-
-variable "service_cidr" {
-  description = "Kubernetes service CIDR"
-  type        = string
-  default     = "10.96.0.0/12"
-}
-
-variable "dns_service_ip" {
-  description = "Kubernetes DNS service IP"
-  type        = string
-  default     = "10.96.0.10"
-}
-
-variable "docker_bridge_cidr" {
-  description = "Docker bridge CIDR"
-  type        = string
-  default     = "172.17.0.1/16"
-}
-
-# Default Node Pool Configuration
-variable "default_node_pool" {
-  description = "Configuration for the default node pool"
-  type = object({
-    vm_size             = string
-    os_disk_size_gb     = number
-    count               = number
-    enable_auto_scaling = bool
-    min_count           = number
-    max_count           = number
-    node_labels         = map(string)
-    node_taints = list(object({
-      key    = string
-      value  = string
-      effect = string
-    }))
-  })
-
   default = {
-    vm_size             = "Standard_D2s_v3"
-    os_disk_size_gb     = 100
-    count               = 2
-    enable_auto_scaling = true
-    min_count           = 1
-    max_count           = 5
-    node_labels = {
-      role = "default"
-    }
-    node_taints = []
+    Environment = "staging"
+    Project     = "elastic-stack"
+    ManagedBy   = "terraform"
   }
-}
-
-# Additional Node Pools
-variable "additional_node_pools" {
-  description = "Configuration for additional node pools"
-  type = map(object({
-    vm_size             = string
-    os_disk_size_gb     = number
-    count               = number
-    enable_auto_scaling = bool
-    min_count           = number
-    max_count           = number
-    node_labels         = map(string)
-    node_taints = list(object({
-      key    = string
-      value  = string
-      effect = string
-    }))
-  }))
-
-  default = {
-    elasticsearch = {
-      vm_size             = "Standard_D4s_v3"
-      os_disk_size_gb     = 200
-      count               = 3
-      enable_auto_scaling = true
-      min_count           = 2
-      max_count           = 6
-      node_labels = {
-        role = "elasticsearch"
-      }
-      node_taints = [{
-        key    = "dedicated"
-        value  = "elasticsearch"
-        effect = "NoSchedule"
-      }]
-    }
-
-    kibana = {
-      vm_size             = "Standard_D2s_v3"
-      os_disk_size_gb     = 100
-      count               = 2
-      enable_auto_scaling = true
-      min_count           = 1
-      max_count           = 4
-      node_labels = {
-        role = "kibana"
-      }
-      node_taints = [{
-        key    = "dedicated"
-        value  = "kibana"
-        effect = "NoSchedule"
-      }]
-    }
-
-    monitoring = {
-      vm_size             = "Standard_D2s_v3"
-      os_disk_size_gb     = 100
-      count               = 1
-      enable_auto_scaling = true
-      min_count           = 1
-      max_count           = 3
-      node_labels = {
-        role = "monitoring"
-      }
-      node_taints = []
-    }
-  }
-}
-
-# Container Registry
-variable "enable_container_registry" {
-  description = "Enable Azure Container Registry"
-  type        = bool
-  default     = true
 }

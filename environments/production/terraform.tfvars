@@ -1,14 +1,11 @@
 # Production Environment Configuration
-environment = "production"
-cluster_name = "advanced-elastic-production-aws"
+# Enhanced configuration for production
 
 # EKS Configuration
 cluster_version = "1.29"
-
-# Override node groups for production (larger instances)
 aws_node_groups = {
   elasticsearch = {
-    instance_types = ["m5.large", "m5.xlarge"]
+    instance_types = ["m5.large"]
     capacity_type = "ON_DEMAND"
     desired_size = 5
     max_size = 10
@@ -17,53 +14,15 @@ aws_node_groups = {
     labels = {
       role = "elasticsearch"
     }
-    taints = [{
-      key    = "dedicated"
-      value  = "elasticsearch"
-      effect = "NO_SCHEDULE"
-    }]
-  }
-  monitoring = {
-    instance_types = ["m5.large"]
-    capacity_type = "ON_DEMAND"
-    desired_size = 3
-    max_size = 5
-    min_size = 2
-    disk_size = 100
-    labels = {
-      role = "monitoring"
-    }
-    taints = []
+    taints = []  # No taints to allow system pods like CoreDNS
   }
 }
 
-# Elasticsearch Configuration
-elasticsearch_replicas = 5
-elasticsearch_resources = {
-  limits = {
-    cpu    = "8000m"
-    memory = "16Gi"
-  }
-  requests = {
-    cpu    = "4000m"
-    memory = "8Gi"
-  }
-}
+# Networking Configuration
+vpc_cidr = "10.0.0.0/16"
+availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
 
-# Monitoring Configuration
-enable_monitoring = true
-enable_logging = true
-enable_metrics = true
-
-# Security Configuration
-enable_security = true
-enable_ssl = true
-
-# Backup Configuration
-enable_backup = true
-backup_retention_days = 30
-
-# Cost Optimization
-enable_spot_instances = false
-enable_auto_scaling = true
-enable_public_access = true
+# Tags
+environment = "production"
+project = "elastic-stack"
+managed_by = "terraform"

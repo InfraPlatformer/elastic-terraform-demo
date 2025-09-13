@@ -1,59 +1,40 @@
-# =============================================================================
-# AZURE AKS CLUSTER MODULE
-# =============================================================================
+# Azure AKS Module
+# This module creates an Azure Kubernetes Service cluster with networking and security
 
-# Azure Resource Group
-resource "azurerm_resource_group" "aks" {
-  name     = var.resource_group_name
-  location = var.location
-
-  tags = merge(var.tags, {
-    Name = "${var.environment}-${var.cluster_name}-rg"
-    Type = "AKS Resource Group"
-  })
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.0"
+    }
+  }
 }
 
-# Azure Virtual Network
-resource "azurerm_virtual_network" "aks" {
-  name                = "${var.cluster_name}-vnet"
-  resource_group_name = azurerm_resource_group.aks.name
-  location            = azurerm_resource_group.aks.location
-  address_space       = var.vnet_address_space
-
-  tags = merge(var.tags, {
-    Name = "${var.environment}-${var.cluster_name}-vnet"
-    Type = "AKS Virtual Network"
-  })
+# Data sources
+data "azurerm_client_config" "current" {}
+data "azurerm_resource_group" "main" {
+  name = var.resource_group_name
 }
 
-# Azure Subnets
-resource "azurerm_subnet" "aks" {
-  name                 = "${var.cluster_name}-subnet"
-  resource_group_name  = azurerm_resource_group.aks.name
-  virtual_network_name = azurerm_virtual_network.aks.name
-  address_prefixes     = var.subnet_address_prefixes
-}
-
-# Azure AKS Cluster
+# AKS Cluster
 resource "azurerm_kubernetes_cluster" "main" {
-  name                = var.cluster_name
-  location            = azurerm_resource_group.aks.location
-  resource_group_name = azurerm_resource_group.aks.name
+  name                = "${var.cluster_name}-aks"
+  location            = data.azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
   dns_prefix          = var.cluster_name
-  kubernetes_version  = var.cluster_version
+  kubernetes_version  = var.kubernetes_version
 
   default_node_pool {
-    name                = "default"
-    vm_size             = var.default_node_pool.vm_size
-    os_disk_size_gb     = var.default_node_pool.os_disk_size_gb
-    count               = var.default_node_pool.count
-    enable_auto_scaling = var.default_node_pool.enable_auto_scaling
-    min_count           = var.default_node_pool.min_count
-    max_count           = var.default_node_pool.max_count
-    vnet_subnet_id      = azurerm_subnet.aks.id
-    type                = "VirtualMachineScaleSets"
-    node_labels         = var.default_node_pool.node_labels
-    node_taints         = var.default_node_pool.node_taints
+    name                = "system"
+    vm_size             = var.node_vm_size
+    node_count          = var.node_count
+    min_count           = var.min_count
+    max_count           = var.max_count
+    enable_auto_scaling = true
+    os_disk_size_gb     = var.os_disk_size_gb
+    vnet_subnet_id      = var.subnet_id
+    node_taints         = var.node_taints
+    labels              = var.node_labels
   }
 
   identity {
@@ -61,119 +42,207 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   network_profile {
-    network_plugin     = "azure"
-    network_policy     = "calico"
-    load_balancer_sku  = "standard"
-    service_cidr       = var.service_cidr
-    dns_service_ip     = var.dns_service_ip
-    docker_bridge_cidr = var.docker_bridge_cidr
+    network_plugin    = "azure"
+    load_balancer_sku = "standard"
+    service_cidr      = var.service_cidr
+    dns_service_ip    = var.dns_service_ip
   }
 
-  addon_profile {
-    azure_policy {
-      enabled = true
-    }
-    oms_agent {
-      enabled                    = true
-      log_analytics_workspace_id = azurerm_log_analytics_workspace.aks.id
-    }
+  # Enable monitoring
+  oms_agent {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
   }
 
-  tags = merge(var.tags, {
-    Name = "${var.environment}-${var.cluster_name}"
-    Type = "AKS Cluster"
-  })
+  # Enable Azure Policy
+  azure_policy_enabled = true
+
+  # Enable RBAC
+  rbac_enabled = true
+
+  # Enable Azure AD integration
+  azure_active_directory_role_based_access_control {
+    managed                = true
+    admin_group_object_ids = var.admin_group_object_ids
+  }
+
+  tags = var.tags
 }
 
-# Additional Node Pools
-resource "azurerm_kubernetes_cluster_node_pool" "additional" {
-  for_each = var.additional_node_pools
-
-  name                  = each.key
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
-  vm_size               = each.value.vm_size
-  os_disk_size_gb       = each.value.os_disk_size_gb
-  node_count            = each.value.count
-  enable_auto_scaling   = each.value.enable_auto_scaling
-  min_count             = each.value.min_count
-  max_count             = each.value.max_count
-  vnet_subnet_id        = azurerm_subnet.aks.id
-  node_labels           = each.value.node_labels
-  node_taints           = each.value.node_taints
-
-  tags = merge(var.tags, {
-    Name = "${var.environment}-${var.cluster_name}-${each.key}-np"
-    Type = "AKS Node Pool"
-  })
-}
-
-# Log Analytics Workspace for Monitoring
-resource "azurerm_log_analytics_workspace" "aks" {
+# Log Analytics Workspace
+resource "azurerm_log_analytics_workspace" "main" {
   name                = "${var.cluster_name}-logs"
-  location            = azurerm_resource_group.aks.location
-  resource_group_name = azurerm_resource_group.aks.name
+  location            = data.azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
   sku                 = "PerGB2018"
   retention_in_days   = 30
 
-  tags = merge(var.tags, {
-    Name = "${var.environment}-${var.cluster_name}-logs"
-    Type = "Log Analytics Workspace"
-  })
+  tags = var.tags
 }
 
-# Azure Container Registry (Optional)
-resource "azurerm_container_registry" "aks" {
-  count               = var.enable_container_registry ? 1 : 0
-  name                = "${replace(var.cluster_name, "-", "")}acr"
-  resource_group_name = azurerm_resource_group.aks.name
-  location            = azurerm_resource_group.aks.location
+# Azure Key Vault for secrets
+resource "azurerm_key_vault" "main" {
+  name                = "${var.cluster_name}-kv"
+  location            = data.azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  sku_name            = "standard"
+
+  purge_protection_enabled = false
+
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.object_id
+
+    key_permissions = [
+      "Get", "List", "Create", "Delete", "Update", "Import", "Backup", "Restore", "Recover"
+    ]
+
+    secret_permissions = [
+      "Get", "List", "Set", "Delete", "Backup", "Restore", "Recover"
+    ]
+
+    certificate_permissions = [
+      "Get", "List", "Create", "Delete", "Update", "Import", "Backup", "Restore", "Recover"
+    ]
+  }
+
+  tags = var.tags
+}
+
+# Key Vault access policy for AKS
+resource "azurerm_key_vault_access_policy" "aks" {
+  key_vault_id = azurerm_key_vault.main.id
+  tenant_id    = azurerm_kubernetes_cluster.main.identity[0].tenant_id
+  object_id    = azurerm_kubernetes_cluster.main.identity[0].principal_id
+
+  key_permissions = [
+    "Get", "List"
+  ]
+
+  secret_permissions = [
+    "Get", "List"
+  ]
+
+  certificate_permissions = [
+    "Get", "List"
+  ]
+}
+
+# Application Gateway for load balancing
+resource "azurerm_application_gateway" "main" {
+  name                = "${var.cluster_name}-agw"
+  resource_group_name = data.azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
+
+  sku {
+    name     = "Standard_v2"
+    tier     = "Standard_v2"
+    capacity = 2
+  }
+
+  gateway_ip_configuration {
+    name      = "gateway-ip-configuration"
+    subnet_id = var.gateway_subnet_id
+  }
+
+  frontend_port {
+    name = "frontend-port"
+    port = 80
+  }
+
+  frontend_ip_configuration {
+    name                 = "frontend-ip-configuration"
+    public_ip_address_id = azurerm_public_ip.gateway.id
+  }
+
+  backend_address_pool {
+    name = "backend-pool"
+  }
+
+  backend_http_settings {
+    name                  = "backend-http-settings"
+    cookie_based_affinity = "Disabled"
+    port                  = 80
+    protocol              = "Http"
+    request_timeout       = 60
+  }
+
+  http_listener {
+    name                           = "http-listener"
+    frontend_ip_configuration_name = "frontend-ip-configuration"
+    frontend_port_name             = "frontend-port"
+    protocol                       = "Http"
+  }
+
+  request_routing_rule {
+    name                       = "routing-rule"
+    rule_type                  = "Basic"
+    http_listener_name         = "http-listener"
+    backend_address_pool_name  = "backend-pool"
+    backend_http_settings_name = "backend-http-settings"
+    priority                   = 1
+  }
+
+  tags = var.tags
+}
+
+# Public IP for Application Gateway
+resource "azurerm_public_ip" "gateway" {
+  name                = "${var.cluster_name}-gateway-pip"
+  resource_group_name = data.azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
+  allocation_method   = "Static"
   sku                 = "Standard"
+
+  tags = var.tags
+}
+
+# Azure Container Registry
+resource "azurerm_container_registry" "main" {
+  name                = "${var.cluster_name}acr"
+  resource_group_name = data.azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
+  sku                 = "Basic"
   admin_enabled       = true
 
-  tags = merge(var.tags, {
-    Name = "${var.environment}-${var.cluster_name}-acr"
-    Type = "Container Registry"
-  })
+  tags = var.tags
 }
 
-# Network Security Group
-resource "azurerm_network_security_group" "aks" {
-  name                = "${var.cluster_name}-nsg"
-  location            = azurerm_resource_group.aks.location
-  resource_group_name = azurerm_resource_group.aks.name
-
-  security_rule {
-    name                       = "AllowHTTPS"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "443"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "AllowHTTP"
-    priority                   = 110
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  tags = merge(var.tags, {
-    Name = "${var.environment}-${var.cluster_name}-nsg"
-    Type = "Network Security Group"
-  })
+# ACR access for AKS
+resource "azurerm_role_assignment" "aks_acr" {
+  scope                = azurerm_container_registry.main.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
 }
 
-# Associate NSG with Subnet
-resource "azurerm_subnet_network_security_group_association" "aks" {
-  subnet_id                 = azurerm_subnet.aks.id
-  network_security_group_id = azurerm_network_security_group.aks.id
+# Azure Monitor for containers
+resource "azurerm_monitor_diagnostic_setting" "aks" {
+  name                       = "${var.cluster_name}-monitor"
+  target_resource_id         = azurerm_kubernetes_cluster.main.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+
+  enabled_log {
+    category = "kube-apiserver"
+  }
+
+  enabled_log {
+    category = "kube-controller-manager"
+  }
+
+  enabled_log {
+    category = "kube-scheduler"
+  }
+
+  enabled_log {
+    category = "kube-audit"
+  }
+
+  enabled_log {
+    category = "cluster-autoscaler"
+  }
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
 }

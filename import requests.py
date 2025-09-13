@@ -2,7 +2,7 @@ import requests
 import json
 import time
 
-def fetch_data(url{}):
+def fetch_data(url):
     try:
         # Your code here
         pass

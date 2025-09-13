@@ -118,7 +118,7 @@ jobs:
       with:
         terraform_version: ${{ env.TF_VERSION }}
         
-    - name: "Setup AWS Credentials"
+    - name: "Setup AWS Credentials (Development)"
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
@@ -127,10 +127,22 @@ jobs:
         role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
         role-session-name: GitHubActions-Dev
         
+    - name: "Verify AWS Credentials"
+      run: |
+        echo "🔍 Verifying AWS credentials..."
+        aws sts get-caller-identity
+        echo "✅ AWS credentials verified"
+        
     - name: "Setup Azure Credentials"
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Verify Azure Credentials"
+      run: |
+        echo "🔍 Verifying Azure credentials..."
+        az account show
+        echo "✅ Azure credentials verified"
         
     - name: "Terraform Plan (Multi-Cloud)"
       run: |
