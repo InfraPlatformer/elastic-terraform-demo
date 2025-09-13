@@ -299,5 +299,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **🔗 Connect with us:**
 - [GitHub](https://github.com/InfraPlatformer)
-- [LinkedIn](https://linkedin.com/in/InfraPlatformer)
-- [Twitter](https://twitter.com/InfraPlatformer)
+- [LinkedIn](https://www.linkedin.com/in/alam-ahmed-133360291/)
+
+
