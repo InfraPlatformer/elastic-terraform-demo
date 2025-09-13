@@ -1,0 +1,53 @@
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:00:00Z", "user_id": "user001", "action": "login", "response_time": 150, "status": "success", "region": "us-west", "device": "desktop", "browser": "chrome", "ip": "192.168.1.100", "bytes": 1024, "method": "POST", "endpoint": "/api/login"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:01:00Z", "user_id": "user002", "action": "search", "response_time": 200, "status": "success", "region": "us-east", "device": "mobile", "browser": "safari", "ip": "192.168.1.101", "bytes": 2048, "method": "GET", "endpoint": "/api/search"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:02:00Z", "user_id": "user003", "action": "purchase", "response_time": 300, "status": "success", "region": "us-west", "device": "desktop", "browser": "firefox", "ip": "192.168.1.102", "bytes": 4096, "method": "POST", "endpoint": "/api/purchase"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:03:00Z", "user_id": "user001", "action": "logout", "response_time": 90, "status": "success", "region": "us-west", "device": "desktop", "browser": "chrome", "ip": "192.168.1.100", "bytes": 512, "method": "POST", "endpoint": "/api/logout"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:04:00Z", "user_id": "user004", "action": "login", "response_time": 120, "status": "error", "region": "us-east", "device": "mobile", "browser": "chrome", "ip": "192.168.1.103", "bytes": 256, "method": "POST", "endpoint": "/api/login"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:05:00Z", "user_id": "user005", "action": "search", "response_time": 180, "status": "success", "region": "us-west", "device": "tablet", "browser": "safari", "ip": "192.168.1.104", "bytes": 1536, "method": "GET", "endpoint": "/api/search"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:06:00Z", "user_id": "user002", "action": "purchase", "response_time": 250, "status": "success", "region": "us-east", "device": "mobile", "browser": "safari", "ip": "192.168.1.101", "bytes": 3072, "method": "POST", "endpoint": "/api/purchase"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:07:00Z", "user_id": "user006", "action": "login", "response_time": 110, "status": "success", "region": "us-west", "device": "desktop", "browser": "edge", "ip": "192.168.1.105", "bytes": 768, "method": "POST", "endpoint": "/api/login"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:08:00Z", "user_id": "user003", "action": "search", "response_time": 160, "status": "success", "region": "us-west", "device": "desktop", "browser": "firefox", "ip": "192.168.1.102", "bytes": 1280, "method": "GET", "endpoint": "/api/search"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:09:00Z", "user_id": "user007", "action": "purchase", "response_time": 280, "status": "error", "region": "us-east", "device": "mobile", "browser": "chrome", "ip": "192.168.1.106", "bytes": 512, "method": "POST", "endpoint": "/api/purchase"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:10:00Z", "user_id": "user001", "action": "search", "response_time": 140, "status": "success", "region": "us-west", "device": "desktop", "browser": "chrome", "ip": "192.168.1.100", "bytes": 1152, "method": "GET", "endpoint": "/api/search"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:11:00Z", "user_id": "user008", "action": "login", "response_time": 95, "status": "success", "region": "us-east", "device": "tablet", "browser": "safari", "ip": "192.168.1.107", "bytes": 640, "method": "POST", "endpoint": "/api/login"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:12:00Z", "user_id": "user004", "action": "logout", "response_time": 85, "status": "success", "region": "us-east", "device": "mobile", "browser": "chrome", "ip": "192.168.1.103", "bytes": 384, "method": "POST", "endpoint": "/api/logout"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:13:00Z", "user_id": "user009", "action": "purchase", "response_time": 320, "status": "success", "region": "us-west", "device": "desktop", "browser": "firefox", "ip": "192.168.1.108", "bytes": 4608, "method": "POST", "endpoint": "/api/purchase"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:14:00Z", "user_id": "user005", "action": "search", "response_time": 170, "status": "success", "region": "us-west", "device": "tablet", "browser": "safari", "ip": "192.168.1.104", "bytes": 1408, "method": "GET", "endpoint": "/api/search"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:15:00Z", "user_id": "user010", "action": "login", "response_time": 105, "status": "error", "region": "us-east", "device": "mobile", "browser": "edge", "ip": "192.168.1.109", "bytes": 320, "method": "POST", "endpoint": "/api/login"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:16:00Z", "user_id": "user002", "action": "logout", "response_time": 75, "status": "success", "region": "us-east", "device": "mobile", "browser": "safari", "ip": "192.168.1.101", "bytes": 448, "method": "POST", "endpoint": "/api/logout"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:17:00Z", "user_id": "user006", "action": "search", "response_time": 190, "status": "success", "region": "us-west", "device": "desktop", "browser": "edge", "ip": "192.168.1.105", "bytes": 1664, "method": "GET", "endpoint": "/api/search"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:18:00Z", "user_id": "user011", "action": "purchase", "response_time": 290, "status": "success", "region": "us-east", "device": "tablet", "browser": "chrome", "ip": "192.168.1.110", "bytes": 3584, "method": "POST", "endpoint": "/api/purchase"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:19:00Z", "user_id": "user003", "action": "logout", "response_time": 80, "status": "success", "region": "us-west", "device": "desktop", "browser": "firefox", "ip": "192.168.1.102", "bytes": 416, "method": "POST", "endpoint": "/api/logout"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:20:00Z", "user_id": "user012", "action": "login", "response_time": 125, "status": "success", "region": "us-west", "device": "mobile", "browser": "safari", "ip": "192.168.1.111", "bytes": 704, "method": "POST", "endpoint": "/api/login"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:21:00Z", "user_id": "user013", "action": "search", "response_time": 135, "status": "success", "region": "us-east", "device": "desktop", "browser": "chrome", "ip": "192.168.1.112", "bytes": 1088, "method": "GET", "endpoint": "/api/search"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:22:00Z", "user_id": "user014", "action": "purchase", "response_time": 310, "status": "success", "region": "us-west", "device": "tablet", "browser": "firefox", "ip": "192.168.1.113", "bytes": 4224, "method": "POST", "endpoint": "/api/purchase"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:23:00Z", "user_id": "user015", "action": "login", "response_time": 115, "status": "success", "region": "us-east", "device": "mobile", "browser": "edge", "ip": "192.168.1.114", "bytes": 576, "method": "POST", "endpoint": "/api/login"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:24:00Z", "user_id": "user016", "action": "search", "response_time": 155, "status": "success", "region": "us-west", "device": "desktop", "browser": "safari", "ip": "192.168.1.115", "bytes": 1216, "method": "GET", "endpoint": "/api/search"}
+{"index": {"_index": "web-logs-2024.01.01"}}
+{"timestamp": "2024-01-01T10:25:00Z", "user_id": "user017", "action": "purchase", "response_time": 270, "status": "error", "region": "us-east", "device": "tablet", "browser": "chrome", "ip": "192.168.1.116", "bytes": 512, "method": "POST", "endpoint": "/api/purchase"}
+

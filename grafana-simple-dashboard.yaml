@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-simple-dashboard
+  namespace: monitoring
+data:
+  simple-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "🚀 Simple Working Dashboard",
+        "tags": ["elastic", "working"],
+        "style": "dark",
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "📊 Document Count",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_indices_docs_total{index=\"example-*\"}",
+                "legendFormat": "Total Documents"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "displayMode": "basic"
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "⚡ Response Time Trend",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(elasticsearch_indices_indexing_index_time_seconds_total[5m])",
+                "legendFormat": "Indexing Rate"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "📈 System Overview",
+            "type": "table",
+            "targets": [
+              {
+                "expr": "up{job=~\"elasticsearch-.*\"}",
+                "legendFormat": "{{job}} - {{instance}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provisioning
+  namespace: monitoring
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 10
+      allowUiUpdates: true
+      options:
+        path: /var/lib/grafana/dashboards
+

@@ -1,0 +1,191 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kibana-config
+  namespace: elasticsearch
+data:
+  kibana.yml: |
+    server.host: "0.0.0.0"
+    server.port: 5601
+    elasticsearch.hosts: ["http://elasticsearch-service.elasticsearch.svc.cluster.local:9200"]
+    xpack.fleet.enabled: false
+    xpack.ingestManager.enabled: false
+    xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters_long"
+    xpack.security.encryptionKey: "something_at_least_32_characters_long"
+    xpack.security.enabled: false
+    xpack.license.selfGenerated.type: "basic"
+    logging.appenders.console.type: "console"
+    logging.appenders.console.layout.type: "pattern"
+    logging.appenders.console.layout.pattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"
+    logging.root.level: "info"
+    logging.appenders.file.type: "file"
+    logging.appenders.file.fileName: "/var/log/kibana/kibana.log"
+    logging.appenders.file.layout.type: "pattern"
+    logging.appenders.file.layout.pattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"
+    logging.loggers:
+      - name: "plugins.fleet"
+        level: "error"
+      - name: "plugins.ingestManager"
+        level: "error"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-fixed
+  namespace: elasticsearch
+  labels:
+    app: kibana-fixed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana-fixed
+  template:
+    metadata:
+      labels:
+        app: kibana-fixed
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.11.0
+        ports:
+        - containerPort: 5601
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: "http://elasticsearch-service.elasticsearch.svc.cluster.local:9200"
+        - name: XPACK_FLEET_ENABLED
+          value: "false"
+        - name: XPACK_INGEST_MANAGER_ENABLED
+          value: "false"
+        - name: XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTION_KEY
+          value: "something_at_least_32_characters_long"
+        - name: XPACK_SECURITY_ENCRYPTION_KEY
+          value: "something_at_least_32_characters_long"
+        - name: XPACK_SECURITY_ENABLED
+          value: "false"
+        - name: XPACK_LICENSE_SELF_GENERATED_TYPE
+          value: "basic"
+        volumeMounts:
+        - name: kibana-config
+          mountPath: /usr/share/kibana/config/kibana.yml
+          subPath: kibana.yml
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: kibana-config
+        configMap:
+          name: kibana-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-fixed-service
+  namespace: elasticsearch
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5601
+    targetPort: 5601
+  selector:
+    app: kibana-fixed
+
+kind: ConfigMap
+metadata:
+  name: kibana-config
+  namespace: elasticsearch
+data:
+  kibana.yml: |
+    server.host: "0.0.0.0"
+    server.port: 5601
+    elasticsearch.hosts: ["http://elasticsearch-service.elasticsearch.svc.cluster.local:9200"]
+    xpack.fleet.enabled: false
+    xpack.ingestManager.enabled: false
+    xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters_long"
+    xpack.security.encryptionKey: "something_at_least_32_characters_long"
+    xpack.security.enabled: false
+    xpack.license.selfGenerated.type: "basic"
+    logging.appenders.console.type: "console"
+    logging.appenders.console.layout.type: "pattern"
+    logging.appenders.console.layout.pattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"
+    logging.root.level: "info"
+    logging.appenders.file.type: "file"
+    logging.appenders.file.fileName: "/var/log/kibana/kibana.log"
+    logging.appenders.file.layout.type: "pattern"
+    logging.appenders.file.layout.pattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"
+    logging.loggers:
+      - name: "plugins.fleet"
+        level: "error"
+      - name: "plugins.ingestManager"
+        level: "error"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-fixed
+  namespace: elasticsearch
+  labels:
+    app: kibana-fixed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana-fixed
+  template:
+    metadata:
+      labels:
+        app: kibana-fixed
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.11.0
+        ports:
+        - containerPort: 5601
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: "http://elasticsearch-service.elasticsearch.svc.cluster.local:9200"
+        - name: XPACK_FLEET_ENABLED
+          value: "false"
+        - name: XPACK_INGEST_MANAGER_ENABLED
+          value: "false"
+        - name: XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTION_KEY
+          value: "something_at_least_32_characters_long"
+        - name: XPACK_SECURITY_ENCRYPTION_KEY
+          value: "something_at_least_32_characters_long"
+        - name: XPACK_SECURITY_ENABLED
+          value: "false"
+        - name: XPACK_LICENSE_SELF_GENERATED_TYPE
+          value: "basic"
+        volumeMounts:
+        - name: kibana-config
+          mountPath: /usr/share/kibana/config/kibana.yml
+          subPath: kibana.yml
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: kibana-config
+        configMap:
+          name: kibana-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-fixed-service
+  namespace: elasticsearch
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5601
+    targetPort: 5601
+  selector:
+    app: kibana-fixed
+

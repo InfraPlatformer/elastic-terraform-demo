@@ -1,0 +1,51 @@
+{
+  "name": "Security Push Protection",
+  "target": "push",
+  "enforcement": "active",
+  "rules": [
+    {
+      "type": "file_path_restriction",
+      "parameters": {
+        "file_paths": [
+          "**/*.key",
+          "**/*.pem",
+          "**/.env*",
+          "**/secrets/**",
+          "**/terraform.tfvars"
+        ]
+      }
+    },
+    {
+      "type": "file_size_restriction",
+      "parameters": {
+        "max_file_size": 104857600
+      }
+    }
+  ]
+}
+
+  "name": "Security Push Protection",
+  "target": "push",
+  "enforcement": "active",
+  "rules": [
+    {
+      "type": "file_path_restriction",
+      "parameters": {
+        "file_paths": [
+          "**/*.key",
+          "**/*.pem",
+          "**/.env*",
+          "**/secrets/**",
+          "**/terraform.tfvars"
+        ]
+      }
+    },
+    {
+      "type": "file_size_restriction",
+      "parameters": {
+        "max_file_size": 104857600
+      }
+    }
+  ]
+}
+

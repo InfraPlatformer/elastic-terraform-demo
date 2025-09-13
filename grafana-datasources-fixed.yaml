@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: monitoring
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      access: proxy
+      url: http://prometheus:9090
+      isDefault: true
+      editable: true
+    - name: AWS Elasticsearch
+      type: elasticsearch
+      access: proxy
+      url: http://a1e545216afc24da9ad1adf1efa59535-454552055.us-west-2.elb.amazonaws.com
+      database: "example-*"
+      timeField: "@timestamp"
+      version: 8
+      editable: true
+      jsonData:
+        timeField: "@timestamp"
+        esVersion: "8.11.0"
+        logMessageField: "message"
+        logLevelField: "level"
+    - name: Working Elasticsearch
+      type: elasticsearch
+      access: proxy
+      url: http://a1e545216afc24da9ad1adf1efa59535-454552055.us-west-2.elb.amazonaws.com
+      database: "example-*"
+      timeField: "timestamp"
+      version: 8
+      editable: true
+      jsonData:
+        timeField: "timestamp"
+        esVersion: "8.11.0"
+        logMessageField: "message"
+        logLevelField: "level"
+

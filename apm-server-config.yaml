@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apm-server-config
+  namespace: elastic-monitoring
+data:
+  apm-server.yml: |
+    apm-server:
+      host: "0.0.0.0:8200"
+      secret_token: "your-secret-token"
+      rum:
+        enabled: true
+        allow_origins: ["*"]
+        allow_headers: ["*"]
+        source_mapping:
+          enabled: true
+          cache:
+            expiration: 5m
+          index_pattern: "apm-*-sourcemap*"
+
+    output.elasticsearch:
+      hosts: '${ELASTICSEARCH_HOSTS:elasticsearch:9200}'
+      username: '${ELASTICSEARCH_USERNAME:}'
+      password: '${ELASTICSEARCH_PASSWORD:}'
+
+    setup.kibana:
+      host: '${KIBANA_HOST:kibana:5601}'
+
+    setup.template.enabled: true
+
+    logging.level: info
+    logging.to_files: true
+    logging.files:
+      path: /var/log/apm-server
+      name: apm-server
+      keepfiles: 7
+      permissions: 0644
+
+    monitoring.enabled: true
+    monitoring.elasticsearch:
+      hosts: '${ELASTICSEARCH_HOSTS:elasticsearch:9200}'
+      username: '${ELASTICSEARCH_USERNAME:}'
+      password: '${ELASTICSEARCH_PASSWORD:}'
+

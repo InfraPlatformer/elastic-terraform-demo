@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-loadbalancer
+  namespace: kibana
+  labels:
+    app: kibana
+spec:
+  selector:
+    run: kibana-final
+  ports:
+  - port: 80
+    targetPort: 5601
+    protocol: TCP
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-loadbalancer
+  namespace: elasticsearch
+  labels:
+    app: elasticsearch
+spec:
+  selector:
+    run: elasticsearch-working
+  ports:
+  - port: 80
+    targetPort: 9200
+    protocol: TCP
+  type: LoadBalancer
+

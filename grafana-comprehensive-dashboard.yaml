@@ -1,217 +1,473 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-elasticsearch-dashboard
+  name: grafana-comprehensive-dashboard
   namespace: monitoring
-  labels:
-    grafana_dashboard: "1"
 data:
-  elasticsearch-dashboard.json: |
+  comprehensive-dashboard.json: |
     {
       "dashboard": {
         "id": null,
-        "title": "Elasticsearch Comprehensive Monitoring",
-        "tags": ["elasticsearch", "monitoring", "comprehensive"],
+        "title": "🚀 Multi-Cloud Elastic Stack - Comprehensive Dashboard",
+        "tags": ["elastic", "multi-cloud", "monitoring", "presentation"],
         "style": "dark",
         "timezone": "browser",
+        "refresh": "30s",
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
         "panels": [
           {
             "id": 1,
-            "title": "Cluster Health Status",
+            "title": "📊 System Overview",
             "type": "stat",
             "targets": [
               {
-                "expr": "elasticsearch_cluster_health_status{cluster=\"docker-cluster\"}",
-                "legendFormat": "Status"
+                "expr": "up{job=~\"elasticsearch-.*\"}",
+                "legendFormat": "Elasticsearch Services"
+              },
+              {
+                "expr": "up{job=~\"kibana-.*\"}",
+                "legendFormat": "Kibana Services"
               }
             ],
             "fieldConfig": {
               "defaults": {
                 "color": {
-                  "mode": "thresholds"
+                  "mode": "palette-classic"
                 },
+                "custom": {
+                  "displayMode": "basic",
+                  "orientation": "horizontal"
+                },
+                "mappings": [],
                 "thresholds": {
                   "steps": [
-                    {"color": "red", "value": 0, "text": "Red"},
-                    {"color": "yellow", "value": 1, "text": "Yellow"},
-                    {"color": "green", "value": 2, "text": "Green"}
+                    {"color": "red", "value": 0},
+                    {"color": "green", "value": 1}
                   ]
-                },
-                "mappings": [
-                  {"type": "value", "value": "0", "text": "Red"},
-                  {"type": "value", "value": "1", "text": "Yellow"},
-                  {"type": "value", "value": "2", "text": "Green"}
-                ]
+                }
               }
             },
-            "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
           },
           {
             "id": 2,
-            "title": "Number of Nodes",
+            "title": "📈 Total Documents",
             "type": "stat",
             "targets": [
               {
-                "expr": "elasticsearch_cluster_health_number_of_nodes{cluster=\"docker-cluster\"}",
-                "legendFormat": "Nodes"
+                "expr": "elasticsearch_indices_docs_total{index=~\"example-.*|web-logs-.*\"}",
+                "legendFormat": "Total Documents"
               }
             ],
-            "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "displayMode": "basic"
+                },
+                "unit": "short"
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
           },
           {
             "id": 3,
-            "title": "Active Shards",
-            "type": "stat",
+            "title": "⚡ Response Time Trends",
+            "type": "timeseries",
             "targets": [
               {
-                "expr": "elasticsearch_cluster_health_active_shards{cluster=\"docker-cluster\"}",
-                "legendFormat": "Active Shards"
+                "expr": "rate(elasticsearch_indices_indexing_index_time_seconds_total[5m])",
+                "legendFormat": "Indexing Rate"
+              },
+              {
+                "expr": "rate(elasticsearch_indices_search_query_time_seconds_total[5m])",
+                "legendFormat": "Search Rate"
               }
             ],
-            "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "drawStyle": "line",
+                  "lineInterpolation": "linear",
+                  "barAlignment": 0,
+                  "lineWidth": 1,
+                  "fillOpacity": 10,
+                  "gradientMode": "none",
+                  "spanNulls": false,
+                  "insertNulls": false,
+                  "showPoints": "auto",
+                  "pointSize": 5,
+                  "stacking": {
+                    "mode": "none",
+                    "group": "A"
+                  },
+                  "axisPlacement": "auto",
+                  "axisLabel": "",
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "red", "value": 80}
+                  ]
+                },
+                "unit": "ops"
+              }
+            },
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
           },
           {
             "id": 4,
-            "title": "Unassigned Shards",
-            "type": "stat",
+            "title": "🌍 Geographic Distribution",
+            "type": "piechart",
             "targets": [
               {
-                "expr": "elasticsearch_cluster_health_unassigned_shards{cluster=\"docker-cluster\"}",
-                "legendFormat": "Unassigned"
+                "expr": "elasticsearch_indices_docs_total{index=~\"example-.*|web-logs-.*\"}",
+                "legendFormat": "{{region}}"
               }
             ],
-            "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  }
+                },
+                "mappings": []
+              }
+            },
+            "options": {
+              "reduceOptions": {
+                "values": false,
+                "calcs": ["lastNotNull"],
+                "fields": ""
+              },
+              "pieType": "pie",
+              "tooltip": {
+                "mode": "single"
+              },
+              "legend": {
+                "displayMode": "list",
+                "placement": "bottom"
+              }
+            },
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16}
           },
           {
             "id": 5,
-            "title": "JVM Heap Usage %",
-            "type": "graph",
+            "title": "📱 Device Types",
+            "type": "piechart",
             "targets": [
               {
-                "expr": "elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"} * 100",
-                "legendFormat": "Heap Usage %"
+                "expr": "elasticsearch_indices_docs_total{index=~\"example-.*|web-logs-.*\"}",
+                "legendFormat": "{{device}}"
               }
             ],
-            "yAxes": [
-              {
-                "label": "Percentage",
-                "max": 100,
-                "min": 0
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  }
+                },
+                "mappings": []
               }
-            ],
-            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+            },
+            "options": {
+              "reduceOptions": {
+                "values": false,
+                "calcs": ["lastNotNull"],
+                "fields": ""
+              },
+              "pieType": "pie",
+              "tooltip": {
+                "mode": "single"
+              },
+              "legend": {
+                "displayMode": "list",
+                "placement": "bottom"
+              }
+            },
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 16}
           },
           {
             "id": 6,
-            "title": "JVM Non-Heap Usage %",
-            "type": "graph",
+            "title": "🌐 Browser Distribution",
+            "type": "piechart",
             "targets": [
               {
-                "expr": "elasticsearch_jvm_memory_used_bytes{area=\"nonheap\"} / elasticsearch_jvm_memory_max_bytes{area=\"nonheap\"} * 100",
-                "legendFormat": "Non-Heap Usage %"
+                "expr": "elasticsearch_indices_docs_total{index=~\"example-.*|web-logs-.*\"}",
+                "legendFormat": "{{browser}}"
               }
             ],
-            "yAxes": [
-              {
-                "label": "Percentage",
-                "max": 100,
-                "min": 0
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  }
+                },
+                "mappings": []
               }
-            ],
-            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+            },
+            "options": {
+              "reduceOptions": {
+                "values": false,
+                "calcs": ["lastNotNull"],
+                "fields": ""
+              },
+              "pieType": "pie",
+              "tooltip": {
+                "mode": "single"
+              },
+              "legend": {
+                "displayMode": "list",
+                "placement": "bottom"
+              }
+            },
+            "gridPos": {"h": 8, "w": 8, "x": 16, "y": 16}
           },
           {
             "id": 7,
-            "title": "Index Operations Rate",
-            "type": "graph",
+            "title": "📊 Action Types Distribution",
+            "type": "bargauge",
+            "targets": [
+              {
+                "expr": "elasticsearch_indices_docs_total{index=~\"example-.*|web-logs-.*\"}",
+                "legendFormat": "{{action}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "red", "value": 80}
+                  ]
+                },
+                "unit": "short"
+              }
+            },
+            "options": {
+              "reduceOptions": {
+                "values": false,
+                "calcs": ["lastNotNull"],
+                "fields": ""
+              },
+              "orientation": "horizontal",
+              "displayMode": "basic"
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+          },
+          {
+            "id": 8,
+            "title": "✅ Success vs Error Status",
+            "type": "piechart",
+            "targets": [
+              {
+                "expr": "elasticsearch_indices_docs_total{index=~\"example-.*|web-logs-.*\"}",
+                "legendFormat": "{{status}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  }
+                },
+                "mappings": []
+              }
+            },
+            "options": {
+              "reduceOptions": {
+                "values": false,
+                "calcs": ["lastNotNull"],
+                "fields": ""
+              },
+              "pieType": "pie",
+              "tooltip": {
+                "mode": "single"
+              },
+              "legend": {
+                "displayMode": "list",
+                "placement": "bottom"
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+          },
+          {
+            "id": 9,
+            "title": "📈 Performance Metrics Over Time",
+            "type": "timeseries",
             "targets": [
               {
                 "expr": "rate(elasticsearch_indices_indexing_index_total[5m])",
                 "legendFormat": "Index Operations/sec"
               },
               {
-                "expr": "rate(elasticsearch_indices_get_total[5m])",
-                "legendFormat": "Get Operations/sec"
-              }
-            ],
-            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
-          },
-          {
-            "id": 8,
-            "title": "Search Operations Rate",
-            "type": "graph",
-            "targets": [
-              {
                 "expr": "rate(elasticsearch_indices_search_query_total[5m])",
                 "legendFormat": "Search Queries/sec"
-              },
-              {
-                "expr": "rate(elasticsearch_indices_search_fetch_total[5m])",
-                "legendFormat": "Fetch Operations/sec"
               }
             ],
-            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
-          },
-          {
-            "id": 9,
-            "title": "Query Time (ms)",
-            "type": "graph",
-            "targets": [
-              {
-                "expr": "elasticsearch_indices_search_query_time_seconds * 1000",
-                "legendFormat": "Query Time (ms)"
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "drawStyle": "line",
+                  "lineInterpolation": "linear",
+                  "barAlignment": 0,
+                  "lineWidth": 1,
+                  "fillOpacity": 10,
+                  "gradientMode": "none",
+                  "spanNulls": false,
+                  "insertNulls": false,
+                  "showPoints": "auto",
+                  "pointSize": 5,
+                  "stacking": {
+                    "mode": "none",
+                    "group": "A"
+                  },
+                  "axisPlacement": "auto",
+                  "axisLabel": "",
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "red", "value": 80}
+                  ]
+                },
+                "unit": "ops"
               }
-            ],
-            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+            },
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32}
           },
           {
             "id": 10,
-            "title": "Disk Usage %",
-            "type": "graph",
+            "title": "🔍 Top Users by Activity",
+            "type": "table",
             "targets": [
               {
-                "expr": "elasticsearch_filesystem_data_used_bytes / elasticsearch_filesystem_data_total_bytes * 100",
-                "legendFormat": "Disk Usage %"
+                "expr": "elasticsearch_indices_docs_total{index=~\"example-.*|web-logs-.*\"}",
+                "legendFormat": "{{user_id}} - {{action}}"
               }
             ],
-            "yAxes": [
-              {
-                "label": "Percentage",
-                "max": 100,
-                "min": 0
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "align": "auto",
+                  "displayMode": "auto"
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "red", "value": 80}
+                  ]
+                }
               }
-            ],
-            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
-          },
-          {
-            "id": 11,
-            "title": "Document Count",
-            "type": "graph",
-            "targets": [
-              {
-                "expr": "elasticsearch_indices_docs_total",
-                "legendFormat": "Total Documents"
-              }
-            ],
-            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32}
-          },
-          {
-            "id": 12,
-            "title": "Index Size (MB)",
-            "type": "graph",
-            "targets": [
-              {
-                "expr": "elasticsearch_indices_store_size_bytes / 1024 / 1024",
-                "legendFormat": "Index Size (MB)"
-              }
-            ],
-            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32}
+            },
+            "options": {
+              "showHeader": true,
+              "sortBy": [
+                {
+                  "desc": true,
+                  "displayName": "Value"
+                }
+              ]
+            },
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 40}
           }
-        ],
-        "time": {
-          "from": "now-1h",
-          "to": "now"
-        },
-        "refresh": "30s"
+        ]
       }
     }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provisioning-comprehensive
+  namespace: monitoring
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+    - name: 'comprehensive-dashboards'
+      orgId: 1
+      folder: 'Elastic Stack'
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 10
+      allowUiUpdates: true
+      options:
+        path: /var/lib/grafana/dashboards/comprehensive

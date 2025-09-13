@@ -1,0 +1,65 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "🚀 Simple Working Dashboard",
+    "tags": ["elastic", "working"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "📊 AWS Elasticsearch Health",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"elasticsearch-aws\"}",
+            "legendFormat": "AWS ES Status"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "📈 Sample Data Count",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "elasticsearch_indices_docs_total{index=\"example-*\"}",
+            "legendFormat": "Total Documents"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "⚡ Response Time Trend",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(elasticsearch_indices_indexing_index_time_seconds_total[5m])",
+            "legendFormat": "Indexing Rate"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

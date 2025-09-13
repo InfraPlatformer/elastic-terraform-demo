@@ -1,0 +1,42 @@
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T10:00:00Z", "user_id": "user001", "action": "login", "response_time": 150, "status": "success", "region": "us-west", "device": "desktop", "browser": "chrome"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T10:15:00Z", "user_id": "user002", "action": "search", "response_time": 200, "status": "success", "region": "us-east", "device": "mobile", "browser": "safari"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T10:30:00Z", "user_id": "user003", "action": "purchase", "response_time": 300, "status": "success", "region": "us-west", "device": "desktop", "browser": "firefox"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T10:45:00Z", "user_id": "user001", "action": "logout", "response_time": 90, "status": "success", "region": "us-west", "device": "desktop", "browser": "chrome"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T11:00:00Z", "user_id": "user004", "action": "login", "response_time": 120, "status": "error", "region": "us-east", "device": "mobile", "browser": "chrome"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T11:15:00Z", "user_id": "user005", "action": "search", "response_time": 180, "status": "success", "region": "us-west", "device": "tablet", "browser": "safari"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T11:30:00Z", "user_id": "user002", "action": "purchase", "response_time": 250, "status": "success", "region": "us-east", "device": "mobile", "browser": "safari"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T11:45:00Z", "user_id": "user006", "action": "login", "response_time": 110, "status": "success", "region": "us-west", "device": "desktop", "browser": "edge"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T12:00:00Z", "user_id": "user003", "action": "search", "response_time": 160, "status": "success", "region": "us-west", "device": "desktop", "browser": "firefox"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T12:15:00Z", "user_id": "user007", "action": "purchase", "response_time": 280, "status": "error", "region": "us-east", "device": "mobile", "browser": "chrome"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T12:30:00Z", "user_id": "user001", "action": "search", "response_time": 140, "status": "success", "region": "us-west", "device": "desktop", "browser": "chrome"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T12:45:00Z", "user_id": "user008", "action": "login", "response_time": 95, "status": "success", "region": "us-east", "device": "tablet", "browser": "safari"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T13:00:00Z", "user_id": "user004", "action": "logout", "response_time": 85, "status": "success", "region": "us-east", "device": "mobile", "browser": "chrome"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T13:15:00Z", "user_id": "user009", "action": "purchase", "response_time": 320, "status": "success", "region": "us-west", "device": "desktop", "browser": "firefox"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T13:30:00Z", "user_id": "user005", "action": "search", "response_time": 170, "status": "success", "region": "us-west", "device": "tablet", "browser": "safari"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T13:45:00Z", "user_id": "user010", "action": "login", "response_time": 105, "status": "error", "region": "us-east", "device": "mobile", "browser": "edge"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T14:00:00Z", "user_id": "user002", "action": "logout", "response_time": 75, "status": "success", "region": "us-east", "device": "mobile", "browser": "safari"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T14:15:00Z", "user_id": "user006", "action": "search", "response_time": 190, "status": "success", "region": "us-west", "device": "desktop", "browser": "edge"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T14:30:00Z", "user_id": "user011", "action": "purchase", "response_time": 290, "status": "success", "region": "us-east", "device": "tablet", "browser": "chrome"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T14:45:00Z", "user_id": "user003", "action": "logout", "response_time": 80, "status": "success", "region": "us-west", "device": "desktop", "browser": "firefox"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T15:00:00Z", "user_id": "user012", "action": "login", "response_time": 125, "status": "success", "region": "us-west", "device": "mobile", "browser": "safari"}

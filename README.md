@@ -1,301 +1,396 @@
-# 🚀 Advanced Elasticsearch & Terraform Infrastructure
+# 🚀 Elastic Stack on AWS with Terraform
 
-**Enterprise-grade Elasticsearch monitoring stack deployed with Infrastructure as Code (IaC) and automated CI/CD pipelines across multiple cloud providers (AWS EKS + Azure AKS).**
+A comprehensive infrastructure-as-code solution for deploying the Elastic Stack (Elasticsearch, Kibana, Grafana) on AWS EKS using Terraform. This project provides a production-ready, scalable, and secure deployment with monitoring, logging, and analytics capabilities.
 
-[![CI/CD Pipeline](https://github.com/InfraPlatformer/elastic-terraform-demo/workflows/Terraform%20Infrastructure%20Pipeline/badge.svg)](https://github.com/InfraPlatformer/elastic-terraform-demo/actions)
-[![Terraform](https://img.shields.io/badge/Terraform-1.5+-blue.svg)](https://www.terraform.io/)
-[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.28+-blue.svg)](https://kubernetes.io/)
-[![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8.5+-green.svg)](https://www.elastic.co/)
+## 📋 Table of Contents
 
-## 🎯 **Project Overview**
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Prerequisites](#-prerequisites)
+- [Quick Start](#-quick-start)
+- [Sample Data](#-sample-data)
+- [Configuration](#-configuration)
+- [Monitoring & Observability](#-monitoring--observability)
+- [Security](#-security)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-This project provides a complete, production-ready Elasticsearch monitoring stack deployed across multiple cloud providers (AWS EKS and Azure AKS) using Terraform. It includes automated CI/CD pipelines, multi-environment support, enterprise-grade security features, and true multi-cloud capabilities.
+## ✨ Features
 
-### **✨ Key Features**
+### 🏗️ Infrastructure
+- **AWS EKS Cluster** with managed node groups
+- **Multi-AZ deployment** for high availability
+- **VPC with public/private subnets** for security
+- **NAT Gateways** for secure outbound connectivity
+- **VPC Endpoints** for AWS services (ECR, S3)
+- **Security Groups** with least-privilege access
 
-- 🏗️ **Infrastructure as Code** - Complete multi-cloud infrastructure defined in Terraform
-- 🌐 **Multi-Cloud Support** - Deploy on AWS EKS, Azure AKS, or both simultaneously
-- 🚀 **Automated CI/CD** - GitHub Actions pipeline with multi-environment deployment
-- 🔒 **Enterprise Security** - X-Pack security, SSL/TLS, and RBAC
-- 📊 **Monitoring Stack** - Elasticsearch, Kibana, and comprehensive monitoring
-- 🌍 **Multi-Environment** - Development, Staging, and Production configurations
-- 💰 **Cost Optimization** - Auto-scaling, spot instances, and resource management
-- 🔄 **GitOps Ready** - ArgoCD integration for advanced deployment strategies
+### 📊 Elastic Stack
+- **Elasticsearch 8.11.0** with full X-Pack features
+- **Kibana 8.11.0** with all plugins enabled
+- **Grafana** for advanced monitoring dashboards
+- **Prometheus** for metrics collection
+- **Machine Learning** capabilities (with license)
+- **Security** and authentication features
 
-## 🏗️ **Architecture**
+### 🔧 DevOps & Operations
+- **Terraform** for infrastructure management
+- **Kubernetes** for container orchestration
+- **Helm charts** for application deployment
+- **Automated scaling** and health checks
+- **Backup and disaster recovery** ready
 
+## 🏛️ Architecture
+
+```mermaid
+graph TB
+    subgraph "AWS Cloud"
+        subgraph "VPC (10.0.0.0/16)"
+            subgraph "Public Subnets"
+                IGW[Internet Gateway]
+                NAT[NAT Gateway]
+                ALB[Application Load Balancer]
+            end
+            
+            subgraph "Private Subnets"
+                subgraph "EKS Cluster"
+                    EKS[EKS Control Plane]
+                    subgraph "Worker Nodes"
+                        ES[Elasticsearch Pods]
+                        KB[Kibana Pods]
+                        GF[Grafana Pods]
+                        PM[Prometheus Pods]
+                    end
+                end
+            end
+            
+            subgraph "VPC Endpoints"
+                ECR[ECR Endpoint]
+                S3[S3 Endpoint]
+            end
+        end
+    end
+    
+    subgraph "External Access"
+        USER[Users]
+        DEV[Developers]
+        OPS[Operations]
+    end
+    
+    USER --> ALB
+    DEV --> ALB
+    OPS --> ALB
+    ALB --> KB
+    ALB --> GF
+    KB --> ES
+    GF --> PM
+    PM --> ES
+    ES --> S3
+    EKS --> ECR
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    GitHub Repository                        │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
-│  │   Development   │  │     Staging     │  │ Production  │ │
-│  │     Branch      │  │     Branch      │  │   Branch    │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 GitHub Actions CI/CD                       │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
-│  │   Security  │  │   Validate  │  │   Deploy & Test    │ │
-│  │    Scan     │  │  Terraform  │  │   Environments     │ │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Multi-Cloud Infrastructure               │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
-│  │     AWS     │  │    Azure    │  │   Elasticsearch     │ │
-│  │     EKS     │  │     AKS     │  │   + Kibana Stack    │ │
-│  │  (Primary)  │  │ (Secondary) │  │   (Multi-Cloud)     │ │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-```
 
-## 🚀 **Quick Start**
+## 🚀 Quick Start
 
-### **Prerequisites**
+### Prerequisites
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.5.0
-- [AWS CLI](https://aws.amazon.com/cli/) configured
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) configured
-- [kubectl](https://kubernetes.io/docs/tasks/tools/) >= 1.28
-- [GitHub Account](https://github.com/) with repository access
+1. **AWS CLI** configured with appropriate permissions
+2. **Terraform** >= 1.0
+3. **kubectl** for Kubernetes management
+4. **Helm** for package management
+5. **Git** for cloning the repository
 
-### **1. Clone Repository**
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/InfraPlatformer/elastic-terraform-demo.git
-cd elastic-terraform-demo
+git clone https://github.com/yourusername/elastic-terraform-aws.git
+cd elastic-terraform-aws
 ```
 
-### **2. Configure Cloud Credentials**
+### 2. Configure AWS Credentials
 
-#### **AWS Configuration**
 ```bash
 aws configure
-# Enter your AWS Access Key ID, Secret Access Key, and Region
+# Enter your AWS Access Key ID, Secret Access Key, and region
 ```
 
-#### **Azure Configuration**
-```bash
-az login
-az account set --subscription "your-subscription-id"
-```
-
-### **3. Deploy Development Environment**
+### 3. Deploy Infrastructure
 
 ```bash
-# Navigate to development environment
-cd environments/development
+# Navigate to staging environment
+cd environments/staging
 
 # Initialize Terraform
 terraform init
 
-# Plan deployment (multi-cloud)
+# Review the plan
 terraform plan
 
-# Apply infrastructure
-terraform apply -auto-approve
+# Deploy the infrastructure
+terraform apply
 ```
 
-### **4. Access Your Multi-Cloud Stack**
+### 4. Access Your Services
+
+After deployment, you'll get the following URLs:
+
+- **Kibana**: `http://your-kibana-loadbalancer-url:5601`
+- **Grafana**: `http://your-grafana-loadbalancer-url:3000`
+- **Elasticsearch**: `http://your-elasticsearch-internal-url:9200`
+
+### 5. Load Sample Data
 
 ```bash
-# Configure kubectl for AWS EKS
-aws eks update-kubeconfig --region us-west-2 --name advanced-elastic-development-aws
+# Load ecommerce products
+curl -X POST "your-elasticsearch-url:9200/_bulk" \
+  -H "Content-Type: application/json" \
+  --data-binary "@sample-data/ecommerce-products.json"
 
-# Configure kubectl for Azure AKS
-az aks get-credentials --resource-group multi-cloud-elastic-rg --name advanced-elastic-development-aws-azure
+# Load web logs
+curl -X POST "your-elasticsearch-url:9200/_bulk" \
+  -H "Content-Type: application/json" \
+  --data-binary "@sample-data/web-logs.json"
 
-# Check Elasticsearch on AWS
-kubectl get pods -n elasticsearch --context=aws
+# Load customer orders
+curl -X POST "your-elasticsearch-url:9200/_bulk" \
+  -H "Content-Type: application/json" \
+  --data-binary "@sample-data/customer-orders.json"
 
-# Check Elasticsearch on Azure
-kubectl get pods -n elasticsearch --context=azure
-
-# Port forward Kibana (AWS)
-kubectl port-forward -n elasticsearch svc/advanced-elastic-development-aws-elasticsearch-aws 9200:9200 --context=aws
-
-# Port forward Kibana (Azure)
-kubectl port-forward -n elasticsearch svc/advanced-elastic-development-aws-elasticsearch-azure 9200:9200 --context=azure
+# Load system metrics
+curl -X POST "your-elasticsearch-url:9200/_bulk" \
+  -H "Content-Type: application/json" \
+  --data-binary "@sample-data/system-metrics.json"
 ```
 
-## 🔧 **CI/CD Pipeline Setup**
+## 📊 Sample Data
 
-### **1. Configure GitHub Secrets**
+This repository includes comprehensive sample data for testing and demonstration:
 
-Follow the [Secrets Setup Guide](.github/SETUP_SECRETS.md) to configure:
-- AWS credentials for each environment
-- Azure credentials for each environment
-- Environment protection rules
-- Deployment permissions
+### E-commerce Products
+- **10 products** across multiple categories
+- **Fields**: name, category, price, brand, rating, description, tags
+- **Use cases**: Product analytics, pricing analysis, inventory management
 
-### **2. Push to Trigger Pipeline**
+### Web Application Logs
+- **10 log entries** with different severity levels
+- **Fields**: timestamp, level, message, user_id, ip_address, response_time
+- **Use cases**: Application monitoring, error tracking, performance analysis
+
+### Customer Orders
+- **5 orders** with complete transaction details
+- **Fields**: order_id, customer_info, items, payment, shipping
+- **Use cases**: Sales analytics, customer behavior, revenue tracking
+
+### System Metrics
+- **10 metric records** from multiple servers
+- **Fields**: cpu_usage, memory_usage, disk_usage, network_io, temperature
+- **Use cases**: Infrastructure monitoring, capacity planning, alerting
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+Create a `terraform.tfvars` file in the `environments/staging` directory:
+
+```hcl
+# AWS Configuration
+aws_region = "us-west-2"
+aws_profile = "default"
+
+# EKS Configuration
+cluster_name = "elastic-stack-cluster"
+cluster_version = "1.29"
+node_instance_types = ["t3.large"]
+node_desired_size = 3
+node_max_size = 5
+node_min_size = 2
+
+# Elasticsearch Configuration
+elasticsearch_version = "8.11.0"
+elasticsearch_storage_size = "100Gi"
+elasticsearch_cpu_requests = "1000m"
+elasticsearch_memory_requests = "4Gi"
+
+# Kibana Configuration
+kibana_version = "8.11.0"
+kibana_cpu_requests = "500m"
+kibana_memory_requests = "2Gi"
+
+# Monitoring Configuration
+enable_monitoring = true
+grafana_admin_password = "your-secure-password"
+```
+
+### Customizing Deployments
+
+You can customize the deployment by modifying the Terraform variables or Helm values:
 
 ```bash
-git add .
-git commit -m "Initial CI/CD setup"
-git push origin develop  # Triggers development deployment
+# Customize Elasticsearch
+vim environments/staging/elasticsearch-values.yaml
+
+# Customize Kibana
+vim environments/staging/kibana-values.yaml
+
+# Customize Grafana
+vim environments/staging/grafana-values.yaml
 ```
 
-### **3. Monitor Pipeline**
+## 📈 Monitoring & Observability
 
-- View runs in GitHub Actions tab
-- Check deployment status in AWS Console
-- Check deployment status in Azure Portal
-- Monitor Kubernetes resources with kubectl
+### Built-in Dashboards
 
-## 🌍 **Environment Configurations**
+1. **Elasticsearch Cluster Health**
+   - Cluster status and node health
+   - Index statistics and shard distribution
+   - Query performance metrics
 
-### **Development Environment**
-- **Purpose**: Local development and testing
-- **Resources**: Multi-cloud (AWS EKS + Azure AKS)
-- **Auto-deploy**: ✅ On `develop` branch
-- **Security**: Basic (disabled for development)
-- **Cloud Providers**: AWS (us-west-2) + Azure (West US 2)
+2. **Application Logs Analysis**
+   - Log level distribution
+   - Error rate trends
+   - Response time analysis
 
-### **Staging Environment**
-- **Purpose**: Pre-production testing
-- **Resources**: Medium (t3.large instances)
-- **Auto-deploy**: ✅ On `main` branch
-- **Security**: Production-like with SSL
-- **Cloud Providers**: AWS (us-west-2)
+3. **E-commerce Analytics**
+   - Product performance metrics
+   - Sales trends and patterns
+   - Customer behavior insights
 
-### **Production Environment**
-- **Purpose**: Live production workloads
-- **Resources**: High (m5.large/xlarge instances)
-- **Auto-deploy**: ❌ Manual approval required
-- **Security**: Enterprise-grade with full encryption
-- **Cloud Providers**: AWS (us-west-2)
+4. **System Infrastructure**
+   - CPU, memory, and disk usage
+   - Network traffic patterns
+   - Temperature monitoring
 
-## 📁 **Project Structure**
+### Custom Dashboards
 
-```
-elastic-terraform/
-├── .github/                          # GitHub Actions CI/CD
-│   ├── workflows/
-│   │   └── terraform-deploy.yml     # Main CI/CD pipeline
-│   └── SETUP_SECRETS.md             # Secrets configuration guide
-├── environments/                     # Environment-specific configs
-│   ├── development/
-│   │   ├── main.tf                  # Development environment main config
-│   │   ├── variables.tf             # Development environment variables
-│   │   ├── outputs.tf               # Development environment outputs
-│   │   └── terraform.tfvars         # Development environment variables
-│   ├── staging/
-│   │   └── terraform.tfvars         # Staging environment variables
-│   └── production/
-│       └── terraform.tfvars         # Production environment variables
-├── modules/                          # Reusable Terraform modules
-│   ├── eks/                         # EKS cluster module
-│   ├── azure-aks/                   # Azure AKS cluster module
-│   ├── elasticsearch/               # Elasticsearch module
-│   ├── kibana/                      # Kibana module
-│   ├── monitoring/                  # Monitoring stack module
-│   ├── networking/                  # VPC and networking module
-│   └── multi-cloud-elasticsearch/   # Multi-cloud Elasticsearch module
-├── elasticsearch-values.yaml         # Elasticsearch Helm values
-├── kibana-values.yaml               # Kibana Helm values
-├── main.tf                          # Main Terraform configuration
-├── variables.tf                     # Variable definitions
-├── outputs.tf                       # Output values
-└── README.md                        # This file
+Create custom dashboards in Kibana or Grafana:
+
+```bash
+# Import sample dashboards
+kubectl apply -f dashboards/kibana-dashboards.yaml
+kubectl apply -f dashboards/grafana-dashboards.yaml
 ```
 
-## 🔒 **Security Features**
+## 🔒 Security
 
-- **X-Pack Security**: Authentication and authorization
-- **SSL/TLS Encryption**: In-transit and at-rest encryption
-- **RBAC**: Role-based access control
-- **Network Policies**: Kubernetes network security
-- **IAM Integration**: AWS IAM roles and policies
-- **Azure RBAC**: Azure role-based access control
-- **Secret Management**: Kubernetes secrets and cloud provider secret management
+### Network Security
+- **Private subnets** for Elasticsearch and databases
+- **Security groups** with restrictive rules
+- **VPC endpoints** for secure AWS service access
+- **NAT gateways** for controlled outbound access
 
-## 📊 **Monitoring & Observability**
+### Application Security
+- **TLS encryption** for all communications
+- **Authentication** and authorization
+- **RBAC** for Kubernetes resources
+- **Secrets management** with AWS Secrets Manager
 
-- **Elasticsearch**: Centralized logging and search across clouds
-- **Kibana**: Data visualization and management
-- **Prometheus**: Metrics collection
-- **Grafana**: Advanced dashboards
-- **Alerting**: Automated notifications
-- **Log Aggregation**: Centralized log management
-- **Multi-Cloud Visibility**: Cross-cloud monitoring and alerting
+### Data Protection
+- **Encryption at rest** for all data
+- **Encryption in transit** for all communications
+- **Backup and recovery** procedures
+- **Audit logging** for compliance
 
-## 💰 **Cost Optimization**
+## 🛠️ Troubleshooting
 
-- **Auto-scaling**: Automatic resource scaling based on demand
-- **Spot Instances**: Use of AWS spot instances for non-critical workloads
-- **Resource Limits**: Proper CPU and memory limits
-- **Storage Optimization**: Efficient EBS volume management
-- **Multi-Cloud Cost Management**: Cost tracking across cloud providers
-- **Monitoring**: Cost tracking and optimization recommendations
+### Common Issues
 
-## 🚨 **Troubleshooting**
+#### 1. EKS Cluster Not Ready
+```bash
+# Check cluster status
+aws eks describe-cluster --name your-cluster-name --region your-region
 
-### **Common Issues**
+# Check node group status
+aws eks describe-nodegroup --cluster-name your-cluster-name --nodegroup-name your-nodegroup-name
+```
 
-1. **Multi-Cloud Connection Issues**
+#### 2. Pods Not Starting
+```bash
+# Check pod status
+kubectl get pods --all-namespaces
+
+# Check pod logs
+kubectl logs -n elasticsearch deployment/elasticsearch
+kubectl logs -n kibana deployment/kibana
+```
+
+#### 3. Elasticsearch Connection Issues
    ```bash
-   # Check AWS Elasticsearch status
-   kubectl get pods -n elasticsearch --context=aws
-   
-   # Check Azure Elasticsearch status
-   kubectl get pods -n elasticsearch --context=azure
-   
-   # Check cross-cloud connectivity
-   kubectl logs -n elasticsearch elasticsearch-aws-0 --context=aws
-   kubectl logs -n elasticsearch elasticsearch-azure-0 --context=azure
-   ```
+# Test Elasticsearch connectivity
+kubectl port-forward -n elasticsearch svc/elasticsearch 9200:9200
+curl http://localhost:9200/_cluster/health
+```
 
-2. **Terraform State Issues**
+#### 4. Kibana Not Loading
+```bash
+# Check Kibana logs
+kubectl logs -n kibana deployment/kibana
+
+# Verify Elasticsearch connection
+kubectl exec -n kibana deployment/kibana -- curl http://elasticsearch.elasticsearch.svc.cluster.local:9200
+```
+
+### Debugging Commands
+
    ```bash
-   # Reinitialize Terraform
-   terraform init -reconfigure
-   
-   # Import existing resources
-   terraform import aws_eks_cluster.main cluster-name
-   terraform import azurerm_kubernetes_cluster.main cluster-name
-   ```
+# Get all resources
+kubectl get all --all-namespaces
 
-3. **CI/CD Pipeline Failures**
-   - Check GitHub Actions logs
-   - Verify AWS and Azure credentials
-   - Check environment protection rules
-   - Verify multi-cloud configuration
+# Check service endpoints
+kubectl get endpoints --all-namespaces
 
-### **Getting Help**
+# Check persistent volumes
+kubectl get pv,pvc --all-namespaces
 
-- 📖 [Documentation](docs/)
-- 🐛 [Issues](https://github.com/InfraPlatformer/elastic-terraform-demo/issues)
-- 💬 [Discussions](https://github.com/InfraPlatformer/elastic-terraform-demo/discussions)
+# Check ingress
+kubectl get ingress --all-namespaces
+```
 
-## 🤝 **Contributing**
+## 📚 Additional Resources
+
+### Documentation
+- [Elasticsearch Documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
+- [Kibana User Guide](https://www.elastic.co/guide/en/kibana/current/index.html)
+- [Grafana Documentation](https://grafana.com/docs/)
+- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+
+### Tutorials
+- [Getting Started with Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started.html)
+- [Kibana Dashboard Creation](https://www.elastic.co/guide/en/kibana/current/dashboard.html)
+- [Grafana Dashboard Import](https://grafana.com/docs/grafana/latest/dashboards/import-dashboard/)
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-## 📄 **License**
+### Reporting Issues
+
+Please use the [GitHub Issues](https://github.com/yourusername/elastic-terraform-aws/issues) page to report bugs or request features.
+
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 **Acknowledgments**
+## 🙏 Acknowledgments
 
-- [HashiCorp Terraform](https://www.terraform.io/) for infrastructure automation
-- [Elastic](https://www.elastic.co/) for the Elasticsearch stack
-- [AWS](https://aws.amazon.com/) for cloud infrastructure
-- [Microsoft Azure](https://azure.microsoft.com/) for cloud infrastructure
-- [Kubernetes](https://kubernetes.io/) for container orchestration
+- [Elastic](https://www.elastic.co/) for the amazing Elastic Stack
+- [Grafana Labs](https://grafana.com/) for the monitoring platform
+- [HashiCorp](https://www.hashicorp.com/) for Terraform
+- [AWS](https://aws.amazon.com/) for the cloud infrastructure
+
+## 📞 Support
+
+- **Documentation**: [Wiki](https://github.com/yourusername/elastic-terraform-aws/wiki)
+- **Issues**: [GitHub Issues](https://github.com/yourusername/elastic-terraform-aws/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/elastic-terraform-aws/discussions)
 
 ---
 
-**⭐ Star this repository if you find it helpful!**
-
-**🔗 Connect with us:**
-- [GitHub](https://github.com/InfraPlatformer)
-- [LinkedIn](https://www.linkedin.com/in/alam-ahmed-133360291/)
+**⭐ If you found this project helpful, please give it a star!**

@@ -1,0 +1,101 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-cloudwatch-config
+  namespace: monitoring
+data:
+  cloudwatch-exporter.yml: |
+    region: us-west-2
+    metrics:
+      - aws_namespace: AWS/EC2
+        aws_metric_name: CPUUtilization
+        aws_dimensions: [InstanceId]
+        aws_statistics: [Average]
+        period_seconds: 300
+      - aws_namespace: AWS/EC2
+        aws_metric_name: NetworkIn
+        aws_dimensions: [InstanceId]
+        aws_statistics: [Sum]
+        period_seconds: 300
+      - aws_namespace: AWS/EC2
+        aws_metric_name: NetworkOut
+        aws_dimensions: [InstanceId]
+        aws_statistics: [Sum]
+        period_seconds: 300
+      - aws_namespace: AWS/EC2
+        aws_metric_name: DiskReadOps
+        aws_dimensions: [InstanceId]
+        aws_statistics: [Sum]
+        period_seconds: 300
+      - aws_namespace: AWS/EC2
+        aws_metric_name: DiskWriteOps
+        aws_dimensions: [InstanceId]
+        aws_statistics: [Sum]
+        period_seconds: 300
+      - aws_namespace: AWS/EKS
+        aws_metric_name: cluster_failed_request_count
+        aws_dimensions: [ClusterName]
+        aws_statistics: [Sum]
+        period_seconds: 300
+      - aws_namespace: AWS/EKS
+        aws_metric_name: cluster_request_duration
+        aws_dimensions: [ClusterName]
+        aws_statistics: [Average]
+        period_seconds: 300
+      - aws_namespace: AWS/ELB
+        aws_metric_name: RequestCount
+        aws_dimensions: [LoadBalancerName]
+        aws_statistics: [Sum]
+        period_seconds: 300
+      - aws_namespace: AWS/ELB
+        aws_metric_name: TargetResponseTime
+        aws_dimensions: [LoadBalancerName]
+        aws_statistics: [Average]
+        period_seconds: 300
+      - aws_namespace: AWS/ELB
+        aws_metric_name: HTTPCode_Target_2XX_Count
+        aws_dimensions: [LoadBalancerName]
+        aws_statistics: [Sum]
+        period_seconds: 300
+      - aws_namespace: AWS/ELB
+        aws_metric_name: HTTPCode_Target_4XX_Count
+        aws_dimensions: [LoadBalancerName]
+        aws_statistics: [Sum]
+        period_seconds: 300
+      - aws_namespace: AWS/ELB
+        aws_metric_name: HTTPCode_Target_5XX_Count
+        aws_dimensions: [LoadBalancerName]
+        aws_statistics: [Sum]
+        period_seconds: 300
+      - aws_namespace: AWS/ES
+        aws_metric_name: ClusterStatus.yellow
+        aws_dimensions: [DomainName, ClientId]
+        aws_statistics: [Maximum]
+        period_seconds: 300
+      - aws_namespace: AWS/ES
+        aws_metric_name: ClusterStatus.red
+        aws_dimensions: [DomainName, ClientId]
+        aws_statistics: [Maximum]
+        period_seconds: 300
+      - aws_namespace: AWS/ES
+        aws_metric_name: CPUUtilization
+        aws_dimensions: [DomainName, ClientId]
+        aws_statistics: [Average]
+        period_seconds: 300
+      - aws_namespace: AWS/ES
+        aws_metric_name: JVMMemoryPressure
+        aws_dimensions: [DomainName, ClientId]
+        aws_statistics: [Average]
+        period_seconds: 300
+      - aws_namespace: AWS/ES
+        aws_metric_name: StorageUtilization
+        aws_dimensions: [DomainName, ClientId]
+        aws_statistics: [Average]
+        period_seconds: 300
+      - aws_namespace: AWS/Billing
+        aws_metric_name: EstimatedCharges
+        aws_dimensions: [Currency]
+        aws_statistics: [Maximum]
+        period_seconds: 86400
+

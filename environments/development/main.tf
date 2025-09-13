@@ -1,7 +1,9 @@
 # =============================================================================
-# DEVELOPMENT ENVIRONMENT MAIN CONFIGURATION
+# DEVELOPMENT ENVIRONMENT - ELASTICSEARCH FOCUSED CONFIGURATION
 # =============================================================================
-# Multi-cloud configuration for development - AWS + Azure
+# Multi-cloud Elasticsearch development environment - AWS + Azure
+# Primary focus: Elasticsearch search engine and data processing
+# Supporting tools: Kibana (UI), Grafana (monitoring)
 # =============================================================================
 
 terraform {
@@ -31,6 +33,8 @@ provider "aws" {
       Environment = var.environment
       Project     = var.project_name
       ManagedBy   = "terraform"
+      Purpose     = "elasticsearch-development"
+      Primary     = "elasticsearch"
     }
   }
 }
@@ -39,7 +43,7 @@ provider "aws" {
 provider "azurerm" {
   features {}
   
-  subscription_id = var.azure_subscription_id
+  # subscription_id = var.azure_subscription_id  # Using CLI auth
   tenant_id       = var.azure_tenant_id
   client_id       = var.azure_client_id
   client_secret   = var.azure_client_secret
@@ -112,7 +116,8 @@ locals {
     Environment = var.environment
     ManagedBy   = "terraform"
     Owner       = var.owner
-    Purpose     = "elastic-stack"
+    Purpose     = "elasticsearch-development"
+    Primary     = "elasticsearch"
     CreatedAt   = timestamp()
     Version     = "1.0.0"
   }
@@ -206,7 +211,11 @@ resource "azurerm_kubernetes_cluster" "main" {
   })
 }
 
-# AWS Elasticsearch Deployment
+# =============================================================================
+# AWS ELASTICSEARCH DEPLOYMENT - PRIMARY SEARCH ENGINE
+# =============================================================================
+
+# AWS Elasticsearch Namespace
 resource "kubernetes_namespace" "elasticsearch_aws" {
   count = var.enable_aws_deployment ? 1 : 0
   
@@ -216,10 +225,13 @@ resource "kubernetes_namespace" "elasticsearch_aws" {
     name = "elasticsearch"
     labels = {
       name = "elasticsearch"
+      purpose = "primary-search-engine"
+      cloud = "aws"
     }
   }
 }
 
+# AWS Elasticsearch Deployment
 resource "kubernetes_deployment" "elasticsearch_aws" {
   count = var.enable_aws_deployment ? 1 : 0
   
@@ -231,6 +243,8 @@ resource "kubernetes_deployment" "elasticsearch_aws" {
     labels = {
       app = "elasticsearch"
       cloud = "aws"
+      tier = "primary"
+      purpose = "search-engine"
     }
   }
 
@@ -342,7 +356,11 @@ resource "kubernetes_service" "elasticsearch_aws" {
   depends_on = [kubernetes_deployment.elasticsearch_aws]
 }
 
-# Azure Elasticsearch Deployment
+# =============================================================================
+# AZURE ELASTICSEARCH DEPLOYMENT - SECONDARY SEARCH ENGINE
+# =============================================================================
+
+# Azure Elasticsearch Namespace
 resource "kubernetes_namespace" "elasticsearch_azure" {
   count = var.enable_azure_deployment ? 1 : 0
   
@@ -352,10 +370,13 @@ resource "kubernetes_namespace" "elasticsearch_azure" {
     name = "elasticsearch"
     labels = {
       name = "elasticsearch"
+      purpose = "secondary-search-engine"
+      cloud = "azure"
     }
   }
 }
 
+# Azure Elasticsearch Deployment
 resource "kubernetes_deployment" "elasticsearch_azure" {
   count = var.enable_azure_deployment ? 1 : 0
   
@@ -367,6 +388,8 @@ resource "kubernetes_deployment" "elasticsearch_azure" {
     labels = {
       app = "elasticsearch"
       cloud = "azure"
+      tier = "secondary"
+      purpose = "search-engine"
     }
   }
 

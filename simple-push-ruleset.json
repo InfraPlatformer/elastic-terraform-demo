@@ -1,0 +1,27 @@
+{
+  "name": "Simple Push Protection",
+  "target": "push",
+  "enforcement": "active",
+  "rules": [
+    {
+      "type": "file_size_restriction",
+      "parameters": {
+        "max_file_size": 104857600
+      }
+    }
+  ]
+}
+
+  "name": "Simple Push Protection",
+  "target": "push",
+  "enforcement": "active",
+  "rules": [
+    {
+      "type": "file_size_restriction",
+      "parameters": {
+        "max_file_size": 104857600
+      }
+    }
+  ]
+}
+

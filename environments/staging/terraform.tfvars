@@ -3,8 +3,8 @@ environment = "staging"
 cluster_name = "elasticsearch-cluster-staging"
 
 # EKS Configuration
-eks_cluster_version = "1.28"
-eks_node_groups = {
+cluster_version = "1.29"
+aws_node_groups = {
   elasticsearch = {
     instance_types = ["t3.large"]
     capacity_type = "ON_DEMAND"
@@ -12,14 +12,10 @@ eks_node_groups = {
     max_size = 5
     min_size = 2
     disk_size = 100
-  }
-  general = {
-    instance_types = ["t3.medium"]
-    capacity_type = "ON_DEMAND"
-    desired_size = 2
-    max_size = 3
-    min_size = 1
-    disk_size = 50
+    labels = {
+      role = "elasticsearch"
+    }
+    taints = []  # No taints to allow system pods like CoreDNS
   }
 }
 

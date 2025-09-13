@@ -1,0 +1,140 @@
+{
+  "index": {"_index": "system-metrics", "_id": "1"},
+  "timestamp": "2024-01-15T10:30:00Z",
+  "hostname": "web-server-01",
+  "cpu_usage_percent": 45.2,
+  "memory_usage_percent": 67.8,
+  "disk_usage_percent": 23.4,
+  "network_in_bytes": 1024000,
+  "network_out_bytes": 2048000,
+  "load_average": 1.2,
+  "uptime_seconds": 86400,
+  "process_count": 156,
+  "temperature_celsius": 42.5
+}
+{
+  "index": {"_index": "system-metrics", "_id": "2"},
+  "timestamp": "2024-01-15T10:31:00Z",
+  "hostname": "web-server-01",
+  "cpu_usage_percent": 52.1,
+  "memory_usage_percent": 71.2,
+  "disk_usage_percent": 23.5,
+  "network_in_bytes": 1156000,
+  "network_out_bytes": 2312000,
+  "load_average": 1.4,
+  "uptime_seconds": 86460,
+  "process_count": 158,
+  "temperature_celsius": 43.1
+}
+{
+  "index": {"_index": "system-metrics", "_id": "3"},
+  "timestamp": "2024-01-15T10:32:00Z",
+  "hostname": "web-server-01",
+  "cpu_usage_percent": 38.7,
+  "memory_usage_percent": 65.3,
+  "disk_usage_percent": 23.6,
+  "network_in_bytes": 980000,
+  "network_out_bytes": 1960000,
+  "load_average": 1.1,
+  "uptime_seconds": 86520,
+  "process_count": 154,
+  "temperature_celsius": 41.8
+}
+{
+  "index": {"_index": "system-metrics", "_id": "4"},
+  "timestamp": "2024-01-15T10:33:00Z",
+  "hostname": "web-server-01",
+  "cpu_usage_percent": 61.4,
+  "memory_usage_percent": 74.6,
+  "disk_usage_percent": 23.7,
+  "network_in_bytes": 1280000,
+  "network_out_bytes": 2560000,
+  "load_average": 1.8,
+  "uptime_seconds": 86580,
+  "process_count": 162,
+  "temperature_celsius": 44.2
+}
+{
+  "index": {"_index": "system-metrics", "_id": "5"},
+  "timestamp": "2024-01-15T10:34:00Z",
+  "hostname": "web-server-01",
+  "cpu_usage_percent": 55.9,
+  "memory_usage_percent": 69.1,
+  "disk_usage_percent": 23.8,
+  "network_in_bytes": 1120000,
+  "network_out_bytes": 2240000,
+  "load_average": 1.5,
+  "uptime_seconds": 86640,
+  "process_count": 159,
+  "temperature_celsius": 42.9
+}
+{
+  "index": {"_index": "system-metrics", "_id": "6"},
+  "timestamp": "2024-01-15T10:30:00Z",
+  "hostname": "db-server-01",
+  "cpu_usage_percent": 23.1,
+  "memory_usage_percent": 45.7,
+  "disk_usage_percent": 67.2,
+  "network_in_bytes": 512000,
+  "network_out_bytes": 1024000,
+  "load_average": 0.8,
+  "uptime_seconds": 172800,
+  "process_count": 89,
+  "temperature_celsius": 38.5
+}
+{
+  "index": {"_index": "system-metrics", "_id": "7"},
+  "timestamp": "2024-01-15T10:31:00Z",
+  "hostname": "db-server-01",
+  "cpu_usage_percent": 28.4,
+  "memory_usage_percent": 48.2,
+  "disk_usage_percent": 67.3,
+  "network_in_bytes": 640000,
+  "network_out_bytes": 1280000,
+  "load_average": 0.9,
+  "uptime_seconds": 172860,
+  "process_count": 91,
+  "temperature_celsius": 39.1
+}
+{
+  "index": {"_index": "system-metrics", "_id": "8"},
+  "timestamp": "2024-01-15T10:32:00Z",
+  "hostname": "db-server-01",
+  "cpu_usage_percent": 31.7,
+  "memory_usage_percent": 51.6,
+  "disk_usage_percent": 67.4,
+  "network_in_bytes": 720000,
+  "network_out_bytes": 1440000,
+  "load_average": 1.0,
+  "uptime_seconds": 172920,
+  "process_count": 93,
+  "temperature_celsius": 39.8
+}
+{
+  "index": {"_index": "system-metrics", "_id": "9"},
+  "timestamp": "2024-01-15T10:33:00Z",
+  "hostname": "db-server-01",
+  "cpu_usage_percent": 26.9,
+  "memory_usage_percent": 47.3,
+  "disk_usage_percent": 67.5,
+  "network_in_bytes": 580000,
+  "network_out_bytes": 1160000,
+  "load_average": 0.9,
+  "uptime_seconds": 172980,
+  "process_count": 90,
+  "temperature_celsius": 38.9
+}
+{
+  "index": {"_index": "system-metrics", "_id": "10"},
+  "timestamp": "2024-01-15T10:34:00Z",
+  "hostname": "db-server-01",
+  "cpu_usage_percent": 29.5,
+  "memory_usage_percent": 49.8,
+  "disk_usage_percent": 67.6,
+  "network_in_bytes": 660000,
+  "network_out_bytes": 1320000,
+  "load_average": 0.9,
+  "uptime_seconds": 173040,
+  "process_count": 92,
+  "temperature_celsius": 39.3
+}

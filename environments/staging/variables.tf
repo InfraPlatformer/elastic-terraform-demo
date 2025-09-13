@@ -1,5 +1,12 @@
 # Staging Environment Variables
 
+# Global Configuration
+variable "project_name" {
+  description = "Name of the project"
+  type        = string
+  default     = "advanced-elastic"
+}
+
 # Environment Configuration
 variable "environment" {
   description = "Environment name"
@@ -11,6 +18,18 @@ variable "cluster_name" {
   description = "Name of the EKS cluster"
   type        = string
   default     = "elasticsearch-cluster-staging"
+}
+
+variable "aws_cluster_name" {
+  description = "Name of the AWS EKS cluster"
+  type        = string
+  default     = "advanced-elastic-staging-aws"
+}
+
+variable "cluster_version" {
+  description = "Kubernetes version for the EKS cluster"
+  type        = string
+  default     = "1.29"
 }
 
 # AWS Configuration
@@ -78,6 +97,12 @@ variable "eks_node_groups" {
 # VPC Configuration
 variable "vpc_cidr_block" {
   description = "CIDR block for VPC"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "aws_vpc_cidr" {
+  description = "CIDR block for AWS VPC"
   type        = string
   default     = "10.0.0.0/16"
 }
@@ -175,5 +200,80 @@ variable "enable_auto_scaling" {
   description = "Enable auto scaling"
   type        = bool
   default     = true
+}
+
+# Additional Required Variables
+variable "aws_node_groups" {
+  description = "AWS EKS node group configuration"
+  type = map(object({
+    instance_types = list(string)
+    capacity_type  = string
+    min_size       = number
+    max_size       = number
+    desired_size   = number
+    disk_size      = number
+    labels = map(string)
+    taints = list(object({
+      key    = string
+      value  = string
+      effect = string
+    }))
+  }))
+  default = {
+    elasticsearch = {
+      instance_types = ["t3.large"]
+      capacity_type  = "ON_DEMAND"
+      min_size       = 2
+      max_size       = 5
+      desired_size   = 3
+      disk_size      = 100
+      labels = {
+        role = "elasticsearch"
+      }
+      taints = []  # Remove taints to allow CoreDNS and other system pods to schedule
+    }
+  }
+}
+
+variable "enable_vpc_endpoints" {
+  description = "Enable VPC endpoints for AWS services"
+  type        = bool
+  default     = true
+}
+
+variable "enable_public_access" {
+  description = "Enable public access to the cluster"
+  type        = bool
+  default     = true
+}
+
+variable "allowed_cidr_blocks" {
+  description = "CIDR blocks allowed to access the cluster"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "enable_ebs_csi_driver" {
+  description = "Enable AWS EBS CSI driver"
+  type        = bool
+  default     = true
+}
+
+variable "ebs_csi_driver_version" {
+  description = "Version of the EBS CSI driver"
+  type        = string
+  default     = "v1.20.0"
+}
+
+variable "common_tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
+  default = {
+    Project     = "advanced-elastic"
+    Environment = "staging"
+    ManagedBy   = "terraform"
+    Purpose     = "elasticsearch-staging"
+    Primary     = "elasticsearch"
+  }
 }
 

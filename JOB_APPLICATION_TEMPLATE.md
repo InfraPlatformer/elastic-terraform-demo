@@ -156,3 +156,4 @@ A: "I use AWS Secrets Manager and IAM roles for service accounts. For CI/CD, I s
 
 **Good luck with your job search! Your infrastructure project is impressive and will definitely catch recruiters' attention! 🎯**
 
+

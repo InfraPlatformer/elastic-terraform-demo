@@ -1,0 +1,110 @@
+{
+  "index": {"_index": "web-logs", "_id": "1"},
+  "timestamp": "2024-01-15T10:30:00Z",
+  "level": "INFO",
+  "message": "User authentication successful",
+  "user_id": "user_123",
+  "ip_address": "192.168.1.100",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+  "response_time_ms": 45,
+  "status_code": 200
+}
+{
+  "index": {"_index": "web-logs", "_id": "2"},
+  "timestamp": "2024-01-15T10:31:15Z",
+  "level": "WARN",
+  "message": "High memory usage detected",
+  "user_id": "system",
+  "ip_address": "127.0.0.1",
+  "user_agent": "System Monitor",
+  "response_time_ms": 0,
+  "status_code": 200
+}
+{
+  "index": {"_index": "web-logs", "_id": "3"},
+  "timestamp": "2024-01-15T10:32:30Z",
+  "level": "ERROR",
+  "message": "Database connection failed",
+  "user_id": "user_456",
+  "ip_address": "192.168.1.101",
+  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+  "response_time_ms": 5000,
+  "status_code": 500
+}
+{
+  "index": {"_index": "web-logs", "_id": "4"},
+  "timestamp": "2024-01-15T10:33:45Z",
+  "level": "INFO",
+  "message": "Product search completed",
+  "user_id": "user_789",
+  "ip_address": "192.168.1.102",
+  "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15",
+  "response_time_ms": 120,
+  "status_code": 200
+}
+{
+  "index": {"_index": "web-logs", "_id": "5"},
+  "timestamp": "2024-01-15T10:35:00Z",
+  "level": "WARN",
+  "message": "Slow query detected",
+  "user_id": "system",
+  "ip_address": "127.0.0.1",
+  "user_agent": "Database Monitor",
+  "response_time_ms": 0,
+  "status_code": 200
+}
+{
+  "index": {"_index": "web-logs", "_id": "6"},
+  "timestamp": "2024-01-15T10:36:15Z",
+  "level": "INFO",
+  "message": "Order placed successfully",
+  "user_id": "user_123",
+  "ip_address": "192.168.1.100",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+  "response_time_ms": 250,
+  "status_code": 201
+}
+{
+  "index": {"_index": "web-logs", "_id": "7"},
+  "timestamp": "2024-01-15T10:37:30Z",
+  "level": "ERROR",
+  "message": "Payment gateway timeout",
+  "user_id": "user_456",
+  "ip_address": "192.168.1.101",
+  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+  "response_time_ms": 30000,
+  "status_code": 504
+}
+{
+  "index": {"_index": "web-logs", "_id": "8"},
+  "timestamp": "2024-01-15T10:38:45Z",
+  "level": "INFO",
+  "message": "User logged out",
+  "user_id": "user_789",
+  "ip_address": "192.168.1.102",
+  "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15",
+  "response_time_ms": 30,
+  "status_code": 200
+}
+{
+  "index": {"_index": "web-logs", "_id": "9"},
+  "timestamp": "2024-01-15T10:40:00Z",
+  "level": "WARN",
+  "message": "Cache miss rate high",
+  "user_id": "system",
+  "ip_address": "127.0.0.1",
+  "user_agent": "Cache Monitor",
+  "response_time_ms": 0,
+  "status_code": 200
+}
+{
+  "index": {"_index": "web-logs", "_id": "10"},
+  "timestamp": "2024-01-15T10:41:15Z",
+  "level": "INFO",
+  "message": "API rate limit reached",
+  "user_id": "user_123",
+  "ip_address": "192.168.1.100",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+  "response_time_ms": 0,
+  "status_code": 429
+}

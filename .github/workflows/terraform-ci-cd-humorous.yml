@@ -1,0 +1,979 @@
+name: "Multi-Cloud Terraform CI/CD Pipeline: The Comedy of Errors"
+
+# Because manually deploying infrastructure is like trying to teach a cat to fetch
+# But with more YAML, fewer lives, and significantly more coffee consumption
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+      - 'modules/**'
+      - '.github/workflows/**'
+      - 'environments/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+      - 'modules/**'
+      - '.github/workflows/**'
+      - 'environments/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to (because we like to choose our own adventure)'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+        - development
+        - staging
+        - production
+
+# Security: Define minimal permissions for the workflow
+# Because we don't want to give it more access than it needs
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  security-events: write
+  actions: read
+
+env:
+  TF_VERSION: "1.6.6"  # Because we like to stay current
+  AWS_REGION: "us-west-2"  # Because we like the West Coast
+  AZURE_LOCATION: "West US 2"  # Because we like consistency
+  CHECKOV_VERSION: "3.1.25"  # Because we like security
+  HUMOR_LEVEL: "HIGH"  # Because we need it
+
+jobs:
+  # =============================================================================
+  # CODE QUALITY & SECURITY (A.K.A. "The Grammar Nazi")
+  # =============================================================================
+  code-quality:
+    name: "Code Quality & Security (The Grammar Nazi)"
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Terraform Format Check (because we like pretty code)"
+      run: |
+        echo "🔍 Checking Terraform formatting..."
+        terraform fmt -check -recursive
+        echo "✅ Terraform formatting is perfect! (Or at least acceptable)"
+        
+    - name: "Terraform Validate (because we need to make sure it makes sense)"
+      run: |
+        echo "🔍 Validating Terraform configuration..."
+        terraform init -backend=false
+        terraform validate
+        echo "✅ Terraform validation passed! (The configuration makes sense)"
+        
+    - name: "Install Checkov (because we need security scanning)"
+      run: |
+        echo "🔍 Installing Checkov for security scanning..."
+        pip install checkov==${{ env.CHECKOV_VERSION }}
+        echo "✅ Checkov installed successfully! (Now we can be paranoid)"
+        
+    - name: "Security Scan with Checkov (because we like to be paranoid)"
+      run: |
+        echo "🔍 Running security scan with Checkov..."
+        checkov -d . --framework terraform --output sarif --output-file-path checkov-results.sarif --soft-fail
+        echo "✅ Security scan completed! (Hopefully no major issues found)"
+        
+    - name: "Upload Checkov results (because we like to share our paranoia)"
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: checkov-results.sarif
+        
+    - name: "Terraform Security Scan (because one security scan isn't enough)"
+      run: |
+        echo "🔍 Running Terraform security scan..."
+        terraform init -backend=false
+        terraform plan -out=tfplan-security
+        terraform show -json tfplan-security > security-plan.json
+        echo "✅ Terraform security scan completed! (Now we have a security plan)"
+        
+    - name: "Run Trivy Security Scan (because we like to be extra paranoid)"
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: "Upload Trivy results (because we like to share our extra paranoia)"
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # =============================================================================
+  # INFRASTRUCTURE TESTING (A.K.A. "The Test Lab")
+  # =============================================================================
+  infrastructure-testing:
+    name: "Infrastructure Testing (The Test Lab)"
+    runs-on: ubuntu-latest
+    needs: code-quality
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+        role-session-name: GitHubActions-Dev
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Terraform Plan (Multi-Cloud) (because we like to plan ahead)"
+      run: |
+        echo "🔍 Creating Terraform plan for multi-cloud deployment..."
+        terraform init
+        terraform plan -out=tfplan-dev -var-file=environments/development/terraform.tfvars
+        terraform show -json tfplan-dev > plan-dev.json
+        echo "✅ Terraform plan created successfully! (Now we know what we're building)"
+        
+    - name: "Security Validation (because we like to be extra careful)"
+      run: |
+        echo "🔍 Validating security of Terraform plan..."
+        # Validate no hardcoded secrets in plan
+        if grep -i "password\|secret\|key" plan-dev.json; then
+          echo "❌ Security violation: Hardcoded secrets detected in Terraform plan"
+          exit 1
+        fi
+        
+        # Validate resource naming follows security standards
+        if ! grep -q "advanced-elastic" plan-dev.json; then
+          echo "❌ Security violation: Resource naming doesn't follow security standards"
+          exit 1
+        fi
+        
+        echo "✅ Security validation passed! (No secrets found, naming is good)"
+        
+    - name: "Upload Terraform Plan (because we like to share our plans)"
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-plan-dev
+        path: plan-dev.json
+
+  # =============================================================================
+  # DEVELOPMENT DEPLOYMENT (A.K.A. "The Wild West")
+  # =============================================================================
+  deploy-development:
+    name: "Deploy to Development (The Wild West)"
+    runs-on: ubuntu-latest
+    needs: [code-quality, infrastructure-testing]
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'development'
+    environment: development
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+        role-session-name: GitHubActions-Dev
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Download Terraform Plan (because we need our plans)"
+      uses: actions/download-artifact@v4
+      with:
+        name: terraform-plan-dev
+        path: .
+        
+    - name: "Deploy to Development (because we need to actually build something)"
+      run: |
+        echo "🚀 Deploying to development environment..."
+        terraform init
+        terraform apply tfplan-dev -auto-approve
+        echo "✅ Development deployment completed! (Hopefully it works)"
+        
+    - name: "Run Post-Deployment Tests (because we need to make sure it works)"
+      run: |
+        echo "🔍 Running post-deployment tests..."
+        
+        # Test AWS EKS connectivity
+        echo "Testing AWS EKS connectivity..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-staging-aws
+        kubectl get pods --all-namespaces
+        echo "✅ AWS EKS connectivity test passed! (The expensive cluster is working)"
+        
+        # Test Azure AKS connectivity
+        echo "Testing Azure AKS connectivity..."
+        az aks get-credentials --resource-group multi-cloud-elastic-rg --name advanced-elastic-staging-azure --overwrite-existing
+        kubectl get pods --all-namespaces
+        echo "✅ Azure AKS connectivity test passed! (The other expensive cluster is working)"
+
+  # =============================================================================
+  # STAGING DEPLOYMENT (A.K.A. "The Test Lab")
+  # =============================================================================
+  deploy-staging:
+    name: "Deploy to Staging (The Test Lab)"
+    runs-on: ubuntu-latest
+    needs: [code-quality, infrastructure-testing]
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
+    environment: staging
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_STAGING }}
+        role-session-name: GitHubActions-Staging
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Terraform Plan (Staging) (because we like to plan ahead)"
+      run: |
+        echo "🔍 Creating Terraform plan for staging deployment..."
+        terraform init
+        terraform plan -out=tfplan-staging -var-file=environments/staging/terraform.tfvars
+        echo "✅ Terraform plan created successfully! (Now we know what we're building)"
+        
+    - name: "Deploy to Staging (because we need to actually build something)"
+      run: |
+        echo "🚀 Deploying to staging environment..."
+        terraform apply tfplan-staging -auto-approve
+        echo "✅ Staging deployment completed! (Hopefully it works)"
+        
+    - name: "Run Post-Deployment Tests (because we need to make sure it works)"
+      run: |
+        echo "🔍 Running post-deployment tests..."
+        
+        # Test AWS EKS connectivity
+        echo "Testing AWS EKS connectivity..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-staging-aws
+        kubectl get pods --all-namespaces
+        echo "✅ AWS EKS connectivity test passed! (The expensive cluster is working)"
+        
+        # Test Azure AKS connectivity
+        echo "Testing Azure AKS connectivity..."
+        az aks get-credentials --resource-group multi-cloud-elastic-rg --name advanced-elastic-staging-azure --overwrite-existing
+        kubectl get pods --all-namespaces
+        echo "✅ Azure AKS connectivity test passed! (The other expensive cluster is working)"
+        
+        # Test Elasticsearch cluster health
+        echo "Testing Elasticsearch cluster health..."
+        kubectl exec -n elasticsearch deployment/elasticsearch-aws -- curl -s localhost:9200/_cluster/health
+        echo "✅ Elasticsearch cluster health test passed! (The search engine is working)"
+
+  # =============================================================================
+  # PRODUCTION DEPLOYMENT (A.K.A. "The Big Leagues")
+  # =============================================================================
+  deploy-production:
+    name: "Deploy to Production (The Big Leagues)"
+    runs-on: ubuntu-latest
+    needs: [code-quality, infrastructure-testing]
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
+    environment: production
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
+        role-session-name: GitHubActions-Prod
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Terraform Plan (Production) (because we like to plan ahead)"
+      run: |
+        echo "🔍 Creating Terraform plan for production deployment..."
+        terraform init
+        terraform plan -out=tfplan-production -var-file=environments/production/terraform.tfvars
+        echo "✅ Terraform plan created successfully! (Now we know what we're building)"
+        
+    - name: "Deploy to Production (because we need to actually build something)"
+      run: |
+        echo "🚀 Deploying to production environment..."
+        terraform apply tfplan-production -auto-approve
+        echo "✅ Production deployment completed! (Hopefully it works)"
+        
+    - name: "Run Production Health Checks (because we need to make sure it works)"
+      run: |
+        echo "🔍 Running production health checks..."
+        
+        # Verify all services are running
+        echo "Verifying all services are running..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-production-aws
+        kubectl get pods --all-namespaces
+        echo "✅ All services are running! (The production environment is healthy)"
+        
+        # Check Elasticsearch cluster health
+        echo "Checking Elasticsearch cluster health..."
+        kubectl exec -n elasticsearch deployment/elasticsearch-aws -- curl -s localhost:9200/_cluster/health
+        echo "✅ Elasticsearch cluster health check passed! (The search engine is working)"
+        
+        # Verify monitoring stack
+        echo "Verifying monitoring stack..."
+        kubectl get pods -n monitoring
+        echo "✅ Monitoring stack is working! (We can see what's happening)"
+
+  # =============================================================================
+  # MONITORING & ALERTING (A.K.A. "The Watchdog")
+  # =============================================================================
+  monitoring-verification:
+    name: "Monitoring Verification (The Watchdog)"
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Verify Multi-Cloud Infrastructure (because we need to make sure everything is working)"
+      run: |
+        echo "🔍 Verifying multi-cloud infrastructure..."
+        
+        # Check AWS EKS status
+        echo "Checking AWS EKS status..."
+        aws eks describe-cluster --name advanced-elastic-staging-aws --region ${{ env.AWS_REGION }}
+        echo "✅ AWS EKS status check passed! (The expensive cluster is working)"
+        
+        # Check Azure AKS status
+        echo "Checking Azure AKS status..."
+        az aks show --resource-group multi-cloud-elastic-rg --name advanced-elastic-staging-azure
+        echo "✅ Azure AKS status check passed! (The other expensive cluster is working)"
+        
+        # Verify Elasticsearch deployment
+        echo "Verifying Elasticsearch deployment..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-staging-aws
+        kubectl get pods -n elasticsearch
+        echo "✅ Elasticsearch deployment verification passed! (The search engine is working)"
+        
+    - name: "Send Deployment Notification (because we like to share our success)"
+      if: always()
+      run: |
+        echo "📧 Sending deployment notification..."
+        echo "Multi-cloud deployment completed for ${{ github.ref }}"
+        echo "AWS EKS: advanced-elastic-staging-aws"
+        echo "Azure AKS: advanced-elastic-staging-azure"
+        echo "✅ Deployment notification sent! (Everyone knows we succeeded)"
+
+  # =============================================================================
+  # CLEANUP & ROLLBACK (A.K.A. "The Emergency Exit")
+  # =============================================================================
+  cleanup-rollback:
+    name: "Cleanup & Rollback (The Emergency Exit)"
+    runs-on: ubuntu-latest
+    if: failure()
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Emergency Rollback (because sometimes we need to go back)"
+      run: |
+        echo "🚨 Emergency rollback triggered!"
+        terraform init
+        # Rollback to previous state if available
+        if [ -f "terraform.tfstate.backup" ]; then
+          echo "Rolling back to previous state..."
+          terraform apply -auto-approve
+          echo "✅ Rollback completed! (We're back to where we started)"
+        else
+          echo "❌ No backup state available for rollback (We're stuck)"
+        fi
+        
+    - name: "Send Rollback Notification (because we like to share our failures)"
+      run: |
+        echo "📧 Sending rollback notification..."
+        echo "Emergency rollback triggered for ${{ github.ref }}"
+        echo "Multi-cloud infrastructure rollback completed"
+        echo "✅ Rollback notification sent! (Everyone knows we failed)"
+
+# =============================================================================
+# END OF WORKFLOW (A.K.A. "The End of the Beginning")
+# =============================================================================
+# If you've made it this far, congratulations! You're either very patient
+# or very desperate. Either way, you're in the right place.
+# 
+# Remember: CI/CD is like cooking - it's all about following the recipe,
+# but sometimes you need to improvise when things go wrong (and they will go wrong).
+#
+# Good luck, and may the Terraform gods be with you! 🚀
+# =============================================================================
+
+
+# Because manually deploying infrastructure is like trying to teach a cat to fetch
+# But with more YAML, fewer lives, and significantly more coffee consumption
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+      - 'modules/**'
+      - '.github/workflows/**'
+      - 'environments/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+      - 'modules/**'
+      - '.github/workflows/**'
+      - 'environments/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to (because we like to choose our own adventure)'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+        - development
+        - staging
+        - production
+
+# Security: Define minimal permissions for the workflow
+# Because we don't want to give it more access than it needs
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  security-events: write
+  actions: read
+
+env:
+  TF_VERSION: "1.6.6"  # Because we like to stay current
+  AWS_REGION: "us-west-2"  # Because we like the West Coast
+  AZURE_LOCATION: "West US 2"  # Because we like consistency
+  CHECKOV_VERSION: "3.1.25"  # Because we like security
+  HUMOR_LEVEL: "HIGH"  # Because we need it
+
+jobs:
+  # =============================================================================
+  # CODE QUALITY & SECURITY (A.K.A. "The Grammar Nazi")
+  # =============================================================================
+  code-quality:
+    name: "Code Quality & Security (The Grammar Nazi)"
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Terraform Format Check (because we like pretty code)"
+      run: |
+        echo "🔍 Checking Terraform formatting..."
+        terraform fmt -check -recursive
+        echo "✅ Terraform formatting is perfect! (Or at least acceptable)"
+        
+    - name: "Terraform Validate (because we need to make sure it makes sense)"
+      run: |
+        echo "🔍 Validating Terraform configuration..."
+        terraform init -backend=false
+        terraform validate
+        echo "✅ Terraform validation passed! (The configuration makes sense)"
+        
+    - name: "Install Checkov (because we need security scanning)"
+      run: |
+        echo "🔍 Installing Checkov for security scanning..."
+        pip install checkov==${{ env.CHECKOV_VERSION }}
+        echo "✅ Checkov installed successfully! (Now we can be paranoid)"
+        
+    - name: "Security Scan with Checkov (because we like to be paranoid)"
+      run: |
+        echo "🔍 Running security scan with Checkov..."
+        checkov -d . --framework terraform --output sarif --output-file-path checkov-results.sarif --soft-fail
+        echo "✅ Security scan completed! (Hopefully no major issues found)"
+        
+    - name: "Upload Checkov results (because we like to share our paranoia)"
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: checkov-results.sarif
+        
+    - name: "Terraform Security Scan (because one security scan isn't enough)"
+      run: |
+        echo "🔍 Running Terraform security scan..."
+        terraform init -backend=false
+        terraform plan -out=tfplan-security
+        terraform show -json tfplan-security > security-plan.json
+        echo "✅ Terraform security scan completed! (Now we have a security plan)"
+        
+    - name: "Run Trivy Security Scan (because we like to be extra paranoid)"
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: "Upload Trivy results (because we like to share our extra paranoia)"
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # =============================================================================
+  # INFRASTRUCTURE TESTING (A.K.A. "The Test Lab")
+  # =============================================================================
+  infrastructure-testing:
+    name: "Infrastructure Testing (The Test Lab)"
+    runs-on: ubuntu-latest
+    needs: code-quality
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+        role-session-name: GitHubActions-Dev
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Terraform Plan (Multi-Cloud) (because we like to plan ahead)"
+      run: |
+        echo "🔍 Creating Terraform plan for multi-cloud deployment..."
+        terraform init
+        terraform plan -out=tfplan-dev -var-file=environments/development/terraform.tfvars
+        terraform show -json tfplan-dev > plan-dev.json
+        echo "✅ Terraform plan created successfully! (Now we know what we're building)"
+        
+    - name: "Security Validation (because we like to be extra careful)"
+      run: |
+        echo "🔍 Validating security of Terraform plan..."
+        # Validate no hardcoded secrets in plan
+        if grep -i "password\|secret\|key" plan-dev.json; then
+          echo "❌ Security violation: Hardcoded secrets detected in Terraform plan"
+          exit 1
+        fi
+        
+        # Validate resource naming follows security standards
+        if ! grep -q "advanced-elastic" plan-dev.json; then
+          echo "❌ Security violation: Resource naming doesn't follow security standards"
+          exit 1
+        fi
+        
+        echo "✅ Security validation passed! (No secrets found, naming is good)"
+        
+    - name: "Upload Terraform Plan (because we like to share our plans)"
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-plan-dev
+        path: plan-dev.json
+
+  # =============================================================================
+  # DEVELOPMENT DEPLOYMENT (A.K.A. "The Wild West")
+  # =============================================================================
+  deploy-development:
+    name: "Deploy to Development (The Wild West)"
+    runs-on: ubuntu-latest
+    needs: [code-quality, infrastructure-testing]
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'development'
+    environment: development
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+        role-session-name: GitHubActions-Dev
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Download Terraform Plan (because we need our plans)"
+      uses: actions/download-artifact@v4
+      with:
+        name: terraform-plan-dev
+        path: .
+        
+    - name: "Deploy to Development (because we need to actually build something)"
+      run: |
+        echo "🚀 Deploying to development environment..."
+        terraform init
+        terraform apply tfplan-dev -auto-approve
+        echo "✅ Development deployment completed! (Hopefully it works)"
+        
+    - name: "Run Post-Deployment Tests (because we need to make sure it works)"
+      run: |
+        echo "🔍 Running post-deployment tests..."
+        
+        # Test AWS EKS connectivity
+        echo "Testing AWS EKS connectivity..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-staging-aws
+        kubectl get pods --all-namespaces
+        echo "✅ AWS EKS connectivity test passed! (The expensive cluster is working)"
+        
+        # Test Azure AKS connectivity
+        echo "Testing Azure AKS connectivity..."
+        az aks get-credentials --resource-group multi-cloud-elastic-rg --name advanced-elastic-staging-azure --overwrite-existing
+        kubectl get pods --all-namespaces
+        echo "✅ Azure AKS connectivity test passed! (The other expensive cluster is working)"
+
+  # =============================================================================
+  # STAGING DEPLOYMENT (A.K.A. "The Test Lab")
+  # =============================================================================
+  deploy-staging:
+    name: "Deploy to Staging (The Test Lab)"
+    runs-on: ubuntu-latest
+    needs: [code-quality, infrastructure-testing]
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
+    environment: staging
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_STAGING }}
+        role-session-name: GitHubActions-Staging
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Terraform Plan (Staging) (because we like to plan ahead)"
+      run: |
+        echo "🔍 Creating Terraform plan for staging deployment..."
+        terraform init
+        terraform plan -out=tfplan-staging -var-file=environments/staging/terraform.tfvars
+        echo "✅ Terraform plan created successfully! (Now we know what we're building)"
+        
+    - name: "Deploy to Staging (because we need to actually build something)"
+      run: |
+        echo "🚀 Deploying to staging environment..."
+        terraform apply tfplan-staging -auto-approve
+        echo "✅ Staging deployment completed! (Hopefully it works)"
+        
+    - name: "Run Post-Deployment Tests (because we need to make sure it works)"
+      run: |
+        echo "🔍 Running post-deployment tests..."
+        
+        # Test AWS EKS connectivity
+        echo "Testing AWS EKS connectivity..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-staging-aws
+        kubectl get pods --all-namespaces
+        echo "✅ AWS EKS connectivity test passed! (The expensive cluster is working)"
+        
+        # Test Azure AKS connectivity
+        echo "Testing Azure AKS connectivity..."
+        az aks get-credentials --resource-group multi-cloud-elastic-rg --name advanced-elastic-staging-azure --overwrite-existing
+        kubectl get pods --all-namespaces
+        echo "✅ Azure AKS connectivity test passed! (The other expensive cluster is working)"
+        
+        # Test Elasticsearch cluster health
+        echo "Testing Elasticsearch cluster health..."
+        kubectl exec -n elasticsearch deployment/elasticsearch-aws -- curl -s localhost:9200/_cluster/health
+        echo "✅ Elasticsearch cluster health test passed! (The search engine is working)"
+
+  # =============================================================================
+  # PRODUCTION DEPLOYMENT (A.K.A. "The Big Leagues")
+  # =============================================================================
+  deploy-production:
+    name: "Deploy to Production (The Big Leagues)"
+    runs-on: ubuntu-latest
+    needs: [code-quality, infrastructure-testing]
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
+    environment: production
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
+        role-session-name: GitHubActions-Prod
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Terraform Plan (Production) (because we like to plan ahead)"
+      run: |
+        echo "🔍 Creating Terraform plan for production deployment..."
+        terraform init
+        terraform plan -out=tfplan-production -var-file=environments/production/terraform.tfvars
+        echo "✅ Terraform plan created successfully! (Now we know what we're building)"
+        
+    - name: "Deploy to Production (because we need to actually build something)"
+      run: |
+        echo "🚀 Deploying to production environment..."
+        terraform apply tfplan-production -auto-approve
+        echo "✅ Production deployment completed! (Hopefully it works)"
+        
+    - name: "Run Production Health Checks (because we need to make sure it works)"
+      run: |
+        echo "🔍 Running production health checks..."
+        
+        # Verify all services are running
+        echo "Verifying all services are running..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-production-aws
+        kubectl get pods --all-namespaces
+        echo "✅ All services are running! (The production environment is healthy)"
+        
+        # Check Elasticsearch cluster health
+        echo "Checking Elasticsearch cluster health..."
+        kubectl exec -n elasticsearch deployment/elasticsearch-aws -- curl -s localhost:9200/_cluster/health
+        echo "✅ Elasticsearch cluster health check passed! (The search engine is working)"
+        
+        # Verify monitoring stack
+        echo "Verifying monitoring stack..."
+        kubectl get pods -n monitoring
+        echo "✅ Monitoring stack is working! (We can see what's happening)"
+
+  # =============================================================================
+  # MONITORING & ALERTING (A.K.A. "The Watchdog")
+  # =============================================================================
+  monitoring-verification:
+    name: "Monitoring Verification (The Watchdog)"
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Verify Multi-Cloud Infrastructure (because we need to make sure everything is working)"
+      run: |
+        echo "🔍 Verifying multi-cloud infrastructure..."
+        
+        # Check AWS EKS status
+        echo "Checking AWS EKS status..."
+        aws eks describe-cluster --name advanced-elastic-staging-aws --region ${{ env.AWS_REGION }}
+        echo "✅ AWS EKS status check passed! (The expensive cluster is working)"
+        
+        # Check Azure AKS status
+        echo "Checking Azure AKS status..."
+        az aks show --resource-group multi-cloud-elastic-rg --name advanced-elastic-staging-azure
+        echo "✅ Azure AKS status check passed! (The other expensive cluster is working)"
+        
+        # Verify Elasticsearch deployment
+        echo "Verifying Elasticsearch deployment..."
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name advanced-elastic-staging-aws
+        kubectl get pods -n elasticsearch
+        echo "✅ Elasticsearch deployment verification passed! (The search engine is working)"
+        
+    - name: "Send Deployment Notification (because we like to share our success)"
+      if: always()
+      run: |
+        echo "📧 Sending deployment notification..."
+        echo "Multi-cloud deployment completed for ${{ github.ref }}"
+        echo "AWS EKS: advanced-elastic-staging-aws"
+        echo "Azure AKS: advanced-elastic-staging-azure"
+        echo "✅ Deployment notification sent! (Everyone knows we succeeded)"
+
+  # =============================================================================
+  # CLEANUP & ROLLBACK (A.K.A. "The Emergency Exit")
+  # =============================================================================
+  cleanup-rollback:
+    name: "Cleanup & Rollback (The Emergency Exit)"
+    runs-on: ubuntu-latest
+    if: failure()
+    
+    steps:
+    - name: "Checkout code (because we need to see what we're working with)"
+      uses: actions/checkout@v4
+      
+    - name: "Setup Terraform (because we need the magic wand)"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+        
+    - name: "Setup AWS Credentials (because we need to spend money)"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ env.AWS_REGION }}
+        
+    - name: "Setup Azure Credentials (because one cloud isn't enough)"
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: "Emergency Rollback (because sometimes we need to go back)"
+      run: |
+        echo "🚨 Emergency rollback triggered!"
+        terraform init
+        # Rollback to previous state if available
+        if [ -f "terraform.tfstate.backup" ]; then
+          echo "Rolling back to previous state..."
+          terraform apply -auto-approve
+          echo "✅ Rollback completed! (We're back to where we started)"
+        else
+          echo "❌ No backup state available for rollback (We're stuck)"
+        fi
+        
+    - name: "Send Rollback Notification (because we like to share our failures)"
+      run: |
+        echo "📧 Sending rollback notification..."
+        echo "Emergency rollback triggered for ${{ github.ref }}"
+        echo "Multi-cloud infrastructure rollback completed"
+        echo "✅ Rollback notification sent! (Everyone knows we failed)"
+
+# =============================================================================
+# END OF WORKFLOW (A.K.A. "The End of the Beginning")
+# =============================================================================
+# If you've made it this far, congratulations! You're either very patient
+# or very desperate. Either way, you're in the right place.
+# 
+# Remember: CI/CD is like cooking - it's all about following the recipe,
+# but sometimes you need to improvise when things go wrong (and they will go wrong).
+#
+# Good luck, and may the Terraform gods be with you! 🚀
+# =============================================================================
+

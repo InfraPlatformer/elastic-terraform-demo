@@ -1,0 +1,11 @@
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T10:00:00Z", "user_id": "user001", "action": "login", "response_time": 150, "status": "success"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T11:00:00Z", "user_id": "user002", "action": "search", "response_time": 200, "status": "success"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T12:00:00Z", "user_id": "user003", "action": "logout", "response_time": 100, "status": "success"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T13:00:00Z", "user_id": "user001", "action": "purchase", "response_time": 300, "status": "success"}
+{"index": {"_index": "example-2024.01.01"}}
+{"timestamp": "2024-01-01T14:00:00Z", "user_id": "user004", "action": "login", "response_time": 120, "status": "error"}
+

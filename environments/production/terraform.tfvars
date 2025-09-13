@@ -66,3 +66,4 @@ backup_retention_days = 30
 # Cost Optimization
 enable_spot_instances = false
 enable_auto_scaling = true
+enable_public_access = true

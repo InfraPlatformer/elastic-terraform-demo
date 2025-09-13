@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: heartbeat-config
+  namespace: elastic-monitoring
+data:
+  heartbeat.yml: |
+    heartbeat.monitors:
+    - type: http
+      id: elasticsearch-health
+      name: Elasticsearch Health Check
+      urls: ["http://elasticsearch-service.elasticsearch.svc.cluster.local:9200/_cluster/health"]
+      schedule: '@every 30s'
+      timeout: 10s
+      check.response.status: 200
+
+    - type: http
+      id: kibana-health
+      name: Kibana Health Check
+      urls: ["http://kibana-service.kibana.svc.cluster.local:5601/api/status"]
+      schedule: '@every 30s'
+      timeout: 10s
+      check.response.status: 200
+
+    - type: http
+      id: prometheus-health
+      name: Prometheus Health Check
+      urls: ["http://prometheus-service.monitoring.svc.cluster.local:9090/-/healthy"]
+      schedule: '@every 30s'
+      timeout: 10s
+      check.response.status: 200
+
+    - type: http
+      id: grafana-health
+      name: Grafana Health Check
+      urls: ["http://grafana-service.monitoring.svc.cluster.local:3000/api/health"]
+      schedule: '@every 30s'
+      timeout: 10s
+      check.response.status: 200
+
+    - type: tcp
+      id: elasticsearch-tcp
+      name: Elasticsearch TCP Check
+      hosts: ["elasticsearch-service.elasticsearch.svc.cluster.local:9200"]
+      schedule: '@every 30s'
+      timeout: 10s
+
+    - type: tcp
+      id: kibana-tcp
+      name: Kibana TCP Check
+      hosts: ["kibana-service.kibana.svc.cluster.local:5601"]
+      schedule: '@every 30s'
+      timeout: 10s
+
+    processors:
+      - add_host_metadata:
+          when.not.contains.tags: forwarded
+
+    output.elasticsearch:
+      hosts: '${ELASTICSEARCH_HOSTS:elasticsearch:9200}'
+      username: '${ELASTICSEARCH_USERNAME:}'
+      password: '${ELASTICSEARCH_PASSWORD:}'
+      index: "heartbeat-%{+yyyy.MM.dd}"
+
+    setup.kibana:
+      host: '${KIBANA_HOST:kibana:5601}'
+
+    setup.dashboards.enabled: true
+    setup.template.enabled: true
+
+    logging.level: info
+    logging.to_files: true
+    logging.files:
+      path: /var/log/heartbeat
+      name: heartbeat
+      keepfiles: 7
+      permissions: 0644
+
+    monitoring.enabled: true
+    monitoring.elasticsearch:
+      hosts: '${ELASTICSEARCH_HOSTS:elasticsearch:9200}'
+      username: '${ELASTICSEARCH_USERNAME:}'
+      password: '${ELASTICSEARCH_PASSWORD:}'
+

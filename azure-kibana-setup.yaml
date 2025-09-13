@@ -1,0 +1,162 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: azure-kibana
+  labels:
+    name: azure-kibana
+    environment: production
+    cloud: azure
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: azure-kibana-config
+  namespace: azure-kibana
+data:
+  kibana.yml: |
+    server.name: azure-kibana-production
+    server.host: "0.0.0.0"
+    server.port: 5601
+    elasticsearch.hosts: ["http://azure-elasticsearch-service.azure-elasticsearch.svc.cluster.local:9200"]
+    elasticsearch.requestTimeout: 300000
+    elasticsearch.shardTimeout: 300000
+    
+    # Security Configuration
+    xpack.security.enabled: false
+    xpack.encryptedSavedObjects.encryptionKey: "azure_kibana_encryption_key_32_chars_long"
+    
+    # Disable problematic features
+    xpack.fleet.enabled: false
+    xpack.ingestManager.enabled: false
+    telemetry.enabled: false
+    xpack.telemetry.enabled: false
+    xpack.ml.enabled: false
+    xpack.watcher.enabled: false
+    xpack.canvas.enabled: false
+    xpack.maps.enabled: false
+    xpack.uptime.enabled: false
+    xpack.apm.enabled: false
+    xpack.infra.enabled: false
+    xpack.logs.enabled: false
+    xpack.metrics.enabled: false
+    xpack.synthetics.enabled: false
+    
+    # Performance optimizations
+    optimize.bundleFilter: "!tests"
+    optimize.useBundleCache: true
+    optimize.watch: false
+    
+    # Logging configuration
+    logging.appenders:
+      console:
+        type: console
+        layout:
+          type: pattern
+          pattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"
+    logging.root:
+      appenders: ["console"]
+      level: "info"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-kibana-service
+  namespace: azure-kibana
+  labels:
+    app: azure-kibana
+spec:
+  selector:
+    app: azure-kibana
+  ports:
+  - port: 5601
+    targetPort: 5601
+    protocol: TCP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-kibana-loadbalancer
+  namespace: azure-kibana
+  labels:
+    app: azure-kibana
+spec:
+  selector:
+    app: azure-kibana
+  ports:
+  - port: 80
+    targetPort: 5601
+    protocol: TCP
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azure-kibana
+  namespace: azure-kibana
+  labels:
+    app: azure-kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: azure-kibana
+  template:
+    metadata:
+      labels:
+        app: azure-kibana
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.11.0
+        ports:
+        - containerPort: 5601
+          name: http
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: "http://azure-elasticsearch-service.azure-elasticsearch.svc.cluster.local:9200"
+        - name: SERVER_NAME
+          value: "azure-kibana-production"
+        - name: SERVER_HOST
+          value: "0.0.0.0"
+        - name: ELASTICSEARCH_REQUESTTIMEOUT
+          value: "300000"
+        - name: XPACK_SECURITY_ENABLED
+          value: "false"
+        - name: XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY
+          value: "azure_kibana_encryption_key_32_chars_long"
+        - name: NODE_OPTIONS
+          value: "--max-old-space-size=1800"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: azure-kibana-config
+          mountPath: /usr/share/kibana/config/kibana.yml
+          subPath: kibana.yml
+        livenessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          timeoutSeconds: 10
+          failureThreshold: 5
+      volumes:
+      - name: azure-kibana-config
+        configMap:
+          name: azure-kibana-config
+      restartPolicy: Always
+

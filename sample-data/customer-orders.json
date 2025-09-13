@@ -1,0 +1,178 @@
+{
+  "index": {"_index": "customer-orders", "_id": "1"},
+  "order_id": "ORD-2024-001",
+  "customer_id": "CUST-123",
+  "customer_name": "John Smith",
+  "customer_email": "john.smith@email.com",
+  "order_date": "2024-01-15T10:30:00Z",
+  "total_amount": 149.98,
+  "currency": "USD",
+  "status": "completed",
+  "payment_method": "credit_card",
+  "shipping_address": {
+    "street": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "zip_code": "10001",
+    "country": "USA"
+  },
+  "items": [
+    {
+      "product_id": "1",
+      "product_name": "Wireless Bluetooth Headphones",
+      "quantity": 1,
+      "unit_price": 99.99,
+      "total_price": 99.99
+    },
+    {
+      "product_id": "6",
+      "product_name": "Stainless Steel Water Bottle",
+      "quantity": 2,
+      "unit_price": 19.99,
+      "total_price": 39.98
+    }
+  ],
+  "shipping_cost": 9.99,
+  "tax_amount": 12.00
+}
+{
+  "index": {"_index": "customer-orders", "_id": "2"},
+  "order_id": "ORD-2024-002",
+  "customer_id": "CUST-456",
+  "customer_name": "Sarah Johnson",
+  "customer_email": "sarah.johnson@email.com",
+  "order_date": "2024-01-16T14:20:00Z",
+  "total_amount": 229.98,
+  "currency": "USD",
+  "status": "shipped",
+  "payment_method": "paypal",
+  "shipping_address": {
+    "street": "456 Oak Ave",
+    "city": "Los Angeles",
+    "state": "CA",
+    "zip_code": "90210",
+    "country": "USA"
+  },
+  "items": [
+    {
+      "product_id": "2",
+      "product_name": "Smart Fitness Watch",
+      "quantity": 1,
+      "unit_price": 199.99,
+      "total_price": 199.99
+    },
+    {
+      "product_id": "4",
+      "product_name": "Yoga Mat Pro",
+      "quantity": 1,
+      "unit_price": 49.99,
+      "total_price": 49.99
+    }
+  ],
+  "shipping_cost": 0.00,
+  "tax_amount": 20.00
+}
+{
+  "index": {"_index": "customer-orders", "_id": "3"},
+  "order_id": "ORD-2024-003",
+  "customer_id": "CUST-789",
+  "customer_name": "Mike Wilson",
+  "customer_email": "mike.wilson@email.com",
+  "order_date": "2024-01-17T09:15:00Z",
+  "total_amount": 24.99,
+  "currency": "USD",
+  "status": "pending",
+  "payment_method": "credit_card",
+  "shipping_address": {
+    "street": "789 Pine St",
+    "city": "Chicago",
+    "state": "IL",
+    "zip_code": "60601",
+    "country": "USA"
+  },
+  "items": [
+    {
+      "product_id": "3",
+      "product_name": "Organic Coffee Beans",
+      "quantity": 1,
+      "unit_price": 24.99,
+      "total_price": 24.99
+    }
+  ],
+  "shipping_cost": 5.99,
+  "tax_amount": 2.50
+}
+{
+  "index": {"_index": "customer-orders", "_id": "4"},
+  "order_id": "ORD-2024-004",
+  "customer_id": "CUST-123",
+  "customer_name": "John Smith",
+  "customer_email": "john.smith@email.com",
+  "order_date": "2024-01-18T16:45:00Z",
+  "total_amount": 279.97,
+  "currency": "USD",
+  "status": "completed",
+  "payment_method": "credit_card",
+  "shipping_address": {
+    "street": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "zip_code": "10001",
+    "country": "USA"
+  },
+  "items": [
+    {
+      "product_id": "7",
+      "product_name": "Gaming Mechanical Keyboard",
+      "quantity": 1,
+      "unit_price": 129.99,
+      "total_price": 129.99
+    },
+    {
+      "product_id": "8",
+      "product_name": "Protein Powder Vanilla",
+      "quantity": 2,
+      "unit_price": 39.99,
+      "total_price": 79.98
+    },
+    {
+      "product_id": "9",
+      "product_name": "Ceramic Dinner Set",
+      "quantity": 1,
+      "unit_price": 79.99,
+      "total_price": 79.99
+    }
+  ],
+  "shipping_cost": 15.99,
+  "tax_amount": 22.40
+}
+{
+  "index": {"_index": "customer-orders", "_id": "5"},
+  "order_id": "ORD-2024-005",
+  "customer_id": "CUST-999",
+  "customer_name": "Emily Davis",
+  "customer_email": "emily.davis@email.com",
+  "order_date": "2024-01-19T11:30:00Z",
+  "total_amount": 899.99,
+  "currency": "USD",
+  "status": "processing",
+  "payment_method": "apple_pay",
+  "shipping_address": {
+    "street": "321 Elm St",
+    "city": "Seattle",
+    "state": "WA",
+    "zip_code": "98101",
+    "country": "USA"
+  },
+  "items": [
+    {
+      "product_id": "10",
+      "product_name": "Premium Wireless Earbuds",
+      "quantity": 1,
+      "unit_price": 899.99,
+      "total_price": 899.99
+    }
+  ],
+  "shipping_cost": 0.00,
+  "tax_amount": 72.00
+}

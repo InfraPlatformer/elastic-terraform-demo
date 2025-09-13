@@ -1,0 +1,883 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-elasticstack
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  elasticstack-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "🚀 Elastic Stack Monitoring Dashboard",
+        "tags": ["elasticsearch", "kibana", "monitoring", "observability"],
+        "style": "dark",
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "📊 Log Levels Distribution",
+            "type": "piechart",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{level}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  }
+                }
+              }
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "id": 2,
+            "title": "🔧 Service Distribution",
+            "type": "barchart",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{service}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  }
+                }
+              }
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 0
+            }
+          },
+          {
+            "id": 3,
+            "title": "⏰ Logs Over Time",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{@timestamp}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                }
+              }
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 24,
+              "x": 0,
+              "y": 8
+            }
+          },
+          {
+            "id": 4,
+            "title": "💻 CPU Usage",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_metrics{cpu}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 70
+                    },
+                    {
+                      "color": "red",
+                      "value": 90
+                    }
+                  ]
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 0,
+              "y": 16
+            }
+          },
+          {
+            "id": 5,
+            "title": "🧠 Memory Usage",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_metrics{memory}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 70
+                    },
+                    {
+                      "color": "red",
+                      "value": 90
+                    }
+                  ]
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 6,
+              "y": 16
+            }
+          },
+          {
+            "id": 6,
+            "title": "💾 Disk Usage",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_metrics{disk}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 70
+                    },
+                    {
+                      "color": "red",
+                      "value": 90
+                    }
+                  ]
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 12,
+              "y": 16
+            }
+          },
+          {
+            "id": 7,
+            "title": "📄 Total Documents",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_docs_total",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 18,
+              "y": 16
+            }
+          },
+          {
+            "id": 8,
+            "title": "🎯 Error Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{level=\"ERROR\"}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    },
+                    {
+                      "color": "red",
+                      "value": 3
+                    }
+                  ]
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 0,
+              "y": 20
+            }
+          },
+          {
+            "id": 9,
+            "title": "✅ Success Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{level=\"INFO\"}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 6,
+              "y": 20
+            }
+          },
+          {
+            "id": 10,
+            "title": "⚠️ Warning Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{level=\"WARN\"}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    },
+                    {
+                      "color": "red",
+                      "value": 2
+                    }
+                  ]
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 12,
+              "y": 20
+            }
+          },
+          {
+            "id": 11,
+            "title": "🔍 Debug Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{level=\"DEBUG\"}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 18,
+              "y": 20
+            }
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "5s"
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provisioning
+  namespace: monitoring
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 10
+      allowUiUpdates: true
+      options:
+        path: /var/lib/grafana/dashboards
+
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-elasticstack
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  elasticstack-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "🚀 Elastic Stack Monitoring Dashboard",
+        "tags": ["elasticsearch", "kibana", "monitoring", "observability"],
+        "style": "dark",
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "📊 Log Levels Distribution",
+            "type": "piechart",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{level}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  }
+                }
+              }
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "id": 2,
+            "title": "🔧 Service Distribution",
+            "type": "barchart",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{service}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  }
+                }
+              }
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 0
+            }
+          },
+          {
+            "id": 3,
+            "title": "⏰ Logs Over Time",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{@timestamp}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "vis": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                }
+              }
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 24,
+              "x": 0,
+              "y": 8
+            }
+          },
+          {
+            "id": 4,
+            "title": "💻 CPU Usage",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_metrics{cpu}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 70
+                    },
+                    {
+                      "color": "red",
+                      "value": 90
+                    }
+                  ]
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 0,
+              "y": 16
+            }
+          },
+          {
+            "id": 5,
+            "title": "🧠 Memory Usage",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_metrics{memory}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 70
+                    },
+                    {
+                      "color": "red",
+                      "value": 90
+                    }
+                  ]
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 6,
+              "y": 16
+            }
+          },
+          {
+            "id": 6,
+            "title": "💾 Disk Usage",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_metrics{disk}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 70
+                    },
+                    {
+                      "color": "red",
+                      "value": 90
+                    }
+                  ]
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 12,
+              "y": 16
+            }
+          },
+          {
+            "id": 7,
+            "title": "📄 Total Documents",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_docs_total",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 18,
+              "y": 16
+            }
+          },
+          {
+            "id": 8,
+            "title": "🎯 Error Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{level=\"ERROR\"}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    },
+                    {
+                      "color": "red",
+                      "value": 3
+                    }
+                  ]
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 0,
+              "y": 20
+            }
+          },
+          {
+            "id": 9,
+            "title": "✅ Success Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{level=\"INFO\"}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 6,
+              "y": 20
+            }
+          },
+          {
+            "id": 10,
+            "title": "⚠️ Warning Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{level=\"WARN\"}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    },
+                    {
+                      "color": "red",
+                      "value": 2
+                    }
+                  ]
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 12,
+              "y": 20
+            }
+          },
+          {
+            "id": 11,
+            "title": "🔍 Debug Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "elasticsearch_logs{level=\"DEBUG\"}",
+                "refId": "A",
+                "datasource": "Elasticsearch"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                }
+              }
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 6,
+              "x": 18,
+              "y": 20
+            }
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "5s"
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provisioning
+  namespace: monitoring
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 10
+      allowUiUpdates: true
+      options:
+        path: /var/lib/grafana/dashboards
+
